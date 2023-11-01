@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Photon.Pun;
+using Photon.Realtime;
 
 public class Launcher : MonoBehaviourPunCallbacks
 {
@@ -14,6 +15,17 @@ public class Launcher : MonoBehaviourPunCallbacks
     }
     public override void OnConnectedToMaster()
     {
+        PhotonNetwork.JoinLobby(TypedLobby.Default);
+    }
+    public override void OnDisconnected(DisconnectCause cause)
+    {
+        ConnectedScreen.SetActive(false);
+        DisconnectedScreen.SetActive(true);
+    }
+
+    public override void OnJoinedLobby()
+    {
+        DisconnectedScreen.SetActive(false);
         ConnectedScreen.SetActive(true);
     }
 }
