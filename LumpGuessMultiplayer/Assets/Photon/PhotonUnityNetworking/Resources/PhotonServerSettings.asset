@@ -42,6 +42,7 @@ MonoBehaviour:
   - DisplayQuestion
   - EnableQuestionBox
   - SendToMasterClient
+  - RecieveFromMasterClient
   DisableAutoOpenWizard: 1
   ShowSettings: 1
   DevRegionSetOnce: 1

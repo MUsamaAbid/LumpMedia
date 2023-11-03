@@ -84,11 +84,15 @@ public class Manager : MonoBehaviourPun
     public void SendToMasterClient(string number, int actorNumber)
     {
         Question.text = "Number: " + number + " Send by: " + actorNumber;
+        photonView.RPC("RecieveFromMasterClient", RpcTarget.Others, number, actorNumber);
     }
 
     [PunRPC]
-    public void RecieveFromMasterClient()
+    public void RecieveFromMasterClient(string answer, int actorNumber)
     {
-
+        if(actorNumber == PhotonNetwork.LocalPlayer.ActorNumber)
+        {
+            Question.text = Question.text + " - " + actorNumber + " Master client recived your answer: " + answer;
+        }
     }
 }
