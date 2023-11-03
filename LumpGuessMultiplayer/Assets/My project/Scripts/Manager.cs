@@ -11,13 +11,14 @@ public class Questions
     [SerializeField] string Question;
     [SerializeField] int Answer;
 }
-public class Answer
+[Serializable]
+public class Player
 {
-    int actorNumber;
-    string name;
-    int answer;
-    int difference; //Set by master client
-    int betAmount;
+    public string name;
+    public int answer;
+    public int betAmount;
+    public int actorNumber;
+    public int difference; //Set by master client only
 }
 public class Manager : MonoBehaviourPun
 {
@@ -30,13 +31,17 @@ public class Manager : MonoBehaviourPun
 
     [SerializeField] Text QuestionText;
 
-    [SerializeField] InputField Answer;
+    [SerializeField] InputField AnswerTF;
     [SerializeField] Button SubmitAnswerButton;
 
     [SerializeField] Questions[] questions;
 
+    List<Player> players;
+
     private void Start()
     {
+        players = new List<Player>();
+
         SpawnPlayer();
         if (PhotonNetwork.IsMasterClient)
         {
@@ -68,7 +73,7 @@ public class Manager : MonoBehaviourPun
     }
     private void Update()
     {
-        if(Answer.text.Length > 0)
+        if(AnswerTF.text.Length > 0)
         {
             SubmitAnswerButton.interactable = true;
         }
@@ -94,18 +99,53 @@ public class Manager : MonoBehaviourPun
         else
         {
             //PhotonView photonView = PhotonView.Get(this);
-            photonView.RPC("SendToMasterClient", RpcTarget.MasterClient, Answer.text, PhotonNetwork.LocalPlayer.ActorNumber);
+            photonView.RPC("SendToMasterClient", RpcTarget.MasterClient, AnswerTF.text, PhotonNetwork.LocalPlayer.ActorNumber, PhotonNetwork.NickName);
         }
     }
     [PunRPC]
-    public void SendToMasterClient(string number, int actorNumber)
+    public void SendToMasterClient(string answer, int actorNumber, string name)
     {
-        QuestionText.text = "Number: " + number + " Send by: " + actorNumber;
-        photonView.RPC("RecieveFromMasterClient", RpcTarget.Others, number, actorNumber);
+        //We are into master client
+        Player p = new Player();
+        p.actorNumber = actorNumber;
+        p.answer = int.Parse(answer);
+        p.name = name;
+        p.betAmount = 10;
+
+        #region If player already exists
+        bool playerexist = false;
+        foreach (Player pl in players)
+        {
+            if(pl.actorNumber == p.actorNumber)
+            {
+                playerexist = true;
+            }
+        }
+        if (!playerexist)
+        {
+            players.Add(p);
+        }
+        else
+        {
+            foreach (Player pl in players)
+            {
+                if (pl.actorNumber == p.actorNumber)
+                {
+                    //pl.actorNumber = actorNumber;
+                    pl.answer = int.Parse(answer);
+                    pl.name = name;
+                    pl.betAmount = 10;
+                }
+            }
+        }
+        #endregion
+
+        QuestionText.text = "Number: " + p.answer + " Send by: " + p.actorNumber + "-Bet: " + p.betAmount;
+        photonView.RPC("RecieveFromMasterClient", RpcTarget.Others, p.answer, p.actorNumber);
     }
 
     [PunRPC]
-    public void RecieveFromMasterClient(string answer, int actorNumber)
+    public void RecieveFromMasterClient(int answer, int actorNumber)
     {
         if(actorNumber == PhotonNetwork.LocalPlayer.ActorNumber)
         {

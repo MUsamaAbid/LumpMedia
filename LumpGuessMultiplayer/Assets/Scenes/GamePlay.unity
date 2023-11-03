@@ -1429,7 +1429,7 @@ MonoBehaviour:
   pv: {fileID: 2040910567}
   QuestionBox: {fileID: 2123555357}
   QuestionText: {fileID: 1193747976}
-  Answer: {fileID: 1016735257}
+  AnswerTF: {fileID: 1016735257}
   SubmitAnswerButton: {fileID: 1219850656}
   questions:
   - Question: How many continents are there on Earth
