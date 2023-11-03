@@ -33,7 +33,7 @@ public class Manager : MonoBehaviourPun
     void SpawnPlayer()
     {
         int r = Random.Range(-8, 8);
-        Vector3 pos = new Vector3(PlayerPrefab.transform.position.x - 3 + r, PlayerPrefab.transform.position.y, PlayerPrefab.transform.position.z);
+        Vector3 pos = new Vector3(PlayerPrefab.transform.position.x + r, PlayerPrefab.transform.position.y - 3, PlayerPrefab.transform.position.z);
         PhotonNetwork.Instantiate(PlayerPrefab.name, pos, PlayerPrefab.transform.rotation);
     }
     public void OnClickDisplayQuestion()
@@ -65,5 +65,30 @@ public class Manager : MonoBehaviourPun
     void EnableQuestionBox()
     {
         QuestionBox.SetActive(true);
+    }
+
+    public void OnSubmitAnswerButton()
+    {
+        //pv.RPC("SendToMasterClient", RpcTarget.All, Answer.text, PhotonNetwork.LocalPlayer.ActorNumber);
+        if (PhotonNetwork.IsMasterClient)
+        {
+            Debug.Log("You are the master client. Cannot send to yourself.");
+        }
+        else
+        {
+            //PhotonView photonView = PhotonView.Get(this);
+            photonView.RPC("SendToMasterClient", RpcTarget.MasterClient, Answer.text, PhotonNetwork.LocalPlayer.ActorNumber);
+        }
+    }
+    [PunRPC]
+    public void SendToMasterClient(string number, int actorNumber)
+    {
+        Question.text = "Number: " + number + " Send by: " + actorNumber;
+    }
+
+    [PunRPC]
+    public void RecieveFromMasterClient()
+    {
+
     }
 }
