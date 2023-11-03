@@ -3,7 +3,22 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using Photon.Pun;
+using System;
 
+[Serializable]
+public class Questions
+{
+    [SerializeField] string Question;
+    [SerializeField] int Answer;
+}
+public class Answer
+{
+    int actorNumber;
+    string name;
+    int answer;
+    int difference; //Set by master client
+    int betAmount;
+}
 public class Manager : MonoBehaviourPun
 {
     [SerializeField] GameObject PlayerPrefab;
@@ -13,10 +28,12 @@ public class Manager : MonoBehaviourPun
 
     [SerializeField] GameObject QuestionBox;
 
-    [SerializeField] Text Question;
+    [SerializeField] Text QuestionText;
 
     [SerializeField] InputField Answer;
     [SerializeField] Button SubmitAnswerButton;
+
+    [SerializeField] Questions[] questions;
 
     private void Start()
     {
@@ -32,14 +49,14 @@ public class Manager : MonoBehaviourPun
     }
     void SpawnPlayer()
     {
-        int r = Random.Range(-8, 8);
+        int r = UnityEngine.Random.Range(-8, 8);
         Vector3 pos = new Vector3(PlayerPrefab.transform.position.x + r, PlayerPrefab.transform.position.y - 3, PlayerPrefab.transform.position.z);
         PhotonNetwork.Instantiate(PlayerPrefab.name, pos, PlayerPrefab.transform.rotation);
     }
     public void OnClickDisplayQuestion()
     {
         ShowQuestionButton.SetActive(false);
-        Question.text = "This is the question";
+        QuestionText.text = "This is the question";
         QuestionBox.SetActive(true);
         pv.RPC("DisplayQuestion", RpcTarget.Others); //Not all because we are already flipping it locally
         pv.RPC("EnableQuestionBox", RpcTarget.Others); //Not all because we are already flipping it locally
@@ -47,7 +64,7 @@ public class Manager : MonoBehaviourPun
     [PunRPC]
     void DisplayQuestion()
     {
-        Question.text = "This is the question";
+        QuestionText.text = "This is the question";
     }
     private void Update()
     {
@@ -83,7 +100,7 @@ public class Manager : MonoBehaviourPun
     [PunRPC]
     public void SendToMasterClient(string number, int actorNumber)
     {
-        Question.text = "Number: " + number + " Send by: " + actorNumber;
+        QuestionText.text = "Number: " + number + " Send by: " + actorNumber;
         photonView.RPC("RecieveFromMasterClient", RpcTarget.Others, number, actorNumber);
     }
 
@@ -92,7 +109,7 @@ public class Manager : MonoBehaviourPun
     {
         if(actorNumber == PhotonNetwork.LocalPlayer.ActorNumber)
         {
-            Question.text = Question.text + " - " + actorNumber + " Master client recived your answer: " + answer;
+            QuestionText.text = QuestionText.text + " - " + actorNumber + " Master client recived your answer: " + answer;
         }
     }
 }
