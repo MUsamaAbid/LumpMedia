@@ -8,8 +8,8 @@ using System;
 [Serializable]
 public class Questions
 {
-    [SerializeField] string Question;
-    [SerializeField] int Answer;
+    [SerializeField] public string Question;
+    [SerializeField] public int Answer;
 }
 [Serializable]
 public class Player
@@ -19,6 +19,7 @@ public class Player
     public int betAmount;
     public int actorNumber;
     public int difference; //Set by master client only
+    public bool replied;
 }
 public class Manager : MonoBehaviourPun
 {
@@ -34,12 +35,17 @@ public class Manager : MonoBehaviourPun
     [SerializeField] InputField AnswerTF;
     [SerializeField] Button SubmitAnswerButton;
 
+    [SerializeField] GameObject CheckForWinnerButton;
+
     [SerializeField] Questions[] questions;
 
     List<Player> players;
 
+    int questionIndex;
+
     private void Start()
     {
+        questionIndex = 2;
         players = new List<Player>();
 
         SpawnPlayer();
@@ -61,15 +67,23 @@ public class Manager : MonoBehaviourPun
     public void OnClickDisplayQuestion()
     {
         ShowQuestionButton.SetActive(false);
-        QuestionText.text = "This is the question";
+        CheckForWinnerButton.SetActive(true);
+
+        //questionIndex = UnityEngine.Random.Range(0, questions.Length - 1);
+        //questionIndex = 0;
+        QuestionText.text = questions[questionIndex].Question;
+
         QuestionBox.SetActive(true);
+
         pv.RPC("DisplayQuestion", RpcTarget.Others); //Not all because we are already flipping it locally
         pv.RPC("EnableQuestionBox", RpcTarget.Others); //Not all because we are already flipping it locally
     }
     [PunRPC]
     void DisplayQuestion()
     {
-        QuestionText.text = "This is the question";
+        //QuestionText.text = "This is the question";
+        //questionIndex = UnityEngine.Random.Range(0, questions.Length - 1);
+        QuestionText.text = questions[questionIndex].Question;
     }
     private void Update()
     {
@@ -95,6 +109,7 @@ public class Manager : MonoBehaviourPun
         if (PhotonNetwork.IsMasterClient)
         {
             Debug.Log("You are the master client. Cannot send to yourself.");
+            SendToMasterClient(AnswerTF.text, PhotonNetwork.LocalPlayer.ActorNumber, PhotonNetwork.NickName);
         }
         else
         {
@@ -111,6 +126,7 @@ public class Manager : MonoBehaviourPun
         p.answer = int.Parse(answer);
         p.name = name;
         p.betAmount = 10;
+        p.difference = CheckForDifference(p.answer, questions[questionIndex].Answer);
 
         #region If player already exists
         bool playerexist = false;
@@ -135,21 +151,59 @@ public class Manager : MonoBehaviourPun
                     pl.answer = int.Parse(answer);
                     pl.name = name;
                     pl.betAmount = 10;
+                    CheckForDifference(pl.answer, questions[questionIndex].Answer);
                 }
             }
         }
         #endregion
 
-        QuestionText.text = "Number: " + p.answer + " Send by: " + p.actorNumber + "-Bet: " + p.betAmount;
-        photonView.RPC("RecieveFromMasterClient", RpcTarget.Others, p.answer, p.actorNumber);
+        //QuestionText.text = "Number: " + p.answer + " Send by: " + p.actorNumber + "-Bet: " + p.betAmount;
+        photonView.RPC("RecieveFromMasterClient", RpcTarget.All, p.answer, p.actorNumber, questions[questionIndex].Answer, CheckForDifference(p.answer, questions[questionIndex].Answer));
     }
 
     [PunRPC]
-    public void RecieveFromMasterClient(int answer, int actorNumber)
+    public void RecieveFromMasterClient(int answer, int actorNumber, int correctAnswer, int difference)
     {
         if(actorNumber == PhotonNetwork.LocalPlayer.ActorNumber)
         {
-            QuestionText.text = QuestionText.text + " - " + actorNumber + " Master client recived your answer: " + answer;
+            QuestionText.text = actorNumber + " Master client recived your answer: " + answer + "- Correct: " + correctAnswer + "- Difference: " + difference;
+        }
+    }
+    public int CheckForDifference(int givenAnswer, int correctAnswer)
+    {
+        return Math.Abs(givenAnswer - correctAnswer);
+    }
+
+    public void CheckForTheWinner()
+    {
+        int diff = players[0].difference;
+        int actorNumber = players[0].actorNumber;
+        foreach(Player p in players)
+        {
+            if(p.difference < diff)
+            {
+                actorNumber = p.actorNumber;
+            }
+        }
+        foreach (Player p in players)
+        {
+            if (actorNumber == p.actorNumber)
+            {
+                photonView.RPC("AnnounceWinner", RpcTarget.All, p.actorNumber, p.answer, questions[questionIndex].Answer, CheckForDifference(p.answer, questions[questionIndex].Answer), p.name);
+            }
+        }
+    }
+
+    [PunRPC]
+    public void AnnounceWinner(int actorNumber, int answer, int correctAnswer, int difference, string name)
+    {
+        if (actorNumber == PhotonNetwork.LocalPlayer.ActorNumber)
+        {
+            QuestionText.text = "You " + name + " with answer " + answer + "- Correct: " + correctAnswer + "- Difference: " + difference + " WINNER!!!";
+        }
+        else
+        {
+            QuestionText.text = name + " with answer " + answer + "- Correct: " + correctAnswer + "- Difference: " + difference + "Wins";
         }
     }
 }
