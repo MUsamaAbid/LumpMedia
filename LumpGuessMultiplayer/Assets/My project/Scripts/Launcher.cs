@@ -28,4 +28,12 @@ public class Launcher : MonoBehaviourPunCallbacks
         DisconnectedScreen.SetActive(false);
         ConnectedScreen.SetActive(true);
     }
+    public void OnClickJoinRandomRoom()
+    {
+        PhotonNetwork.JoinRandomRoom();
+    }
+    public override void OnJoinRandomFailed(short returnCode, string message)
+    {
+        Debug.Log(returnCode + " - Room Not Joined: " + message);
+    }
 }
