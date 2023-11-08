@@ -8,6 +8,8 @@ public class MyPlayer : MonoBehaviourPun
 {
     [SerializeField] Text PlayerName;
     [SerializeField] PhotonView pv;
+
+    [SerializeField] Manager manager;
     // Start is called before the first frame update
     void Start()
     {
@@ -19,5 +21,12 @@ public class MyPlayer : MonoBehaviourPun
         {
             PlayerName.text = pv.Owner.NickName;
         }
+        AddInTheList();
      }
+
+    void AddInTheList()
+    {
+        if (!manager) manager = FindObjectOfType<Manager>();
+        manager.AddToRoom();
+    }
 }

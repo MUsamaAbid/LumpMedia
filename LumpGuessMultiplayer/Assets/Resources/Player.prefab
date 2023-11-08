@@ -150,6 +150,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   PlayerName: {fileID: 1285929733380884926}
   pv: {fileID: 3267488824471719146}
+  manager: {fileID: 0}
 --- !u!1 &1285929734254222620
 GameObject:
   m_ObjectHideFlags: 0

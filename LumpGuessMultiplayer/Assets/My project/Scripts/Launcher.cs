@@ -9,6 +9,10 @@ public class Launcher : MonoBehaviourPunCallbacks
     [SerializeField] GameObject ConnectedScreen;
     [SerializeField] GameObject DisconnectedScreen;
 
+    private void Start()
+    {
+        Application.targetFrameRate = 30;
+    }
     public void OnClickConnectButton()
     {
         PhotonNetwork.ConnectUsingSettings();

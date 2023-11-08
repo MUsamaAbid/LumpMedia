@@ -39,14 +39,21 @@ public class Manager : MonoBehaviourPun
 
     [SerializeField] Questions[] questions;
 
+    [SerializeField] InputField BetAmount;
+
     List<Player> players;
+    List<Player> winner;
 
     int questionIndex;
+
+    [SerializeField] Text ListOfPlayer;
+
 
     private void Start()
     {
         questionIndex = 2;
         players = new List<Player>();
+        winner = new List<Player>();
 
         SpawnPlayer();
         if (PhotonNetwork.IsMasterClient)
@@ -109,7 +116,8 @@ public class Manager : MonoBehaviourPun
         if (PhotonNetwork.IsMasterClient)
         {
             Debug.Log("You are the master client. Cannot send to yourself.");
-            SendToMasterClient(AnswerTF.text, PhotonNetwork.LocalPlayer.ActorNumber, PhotonNetwork.NickName);
+            //SendToMasterClient(AnswerTF.text, PhotonNetwork.LocalPlayer.ActorNumber, PhotonNetwork.NickName);
+            photonView.RPC("SendToMasterClient", RpcTarget.MasterClient, AnswerTF.text, PhotonNetwork.LocalPlayer.ActorNumber, PhotonNetwork.NickName);
         }
         else
         {
@@ -121,7 +129,7 @@ public class Manager : MonoBehaviourPun
     public void SendToMasterClient(string answer, int actorNumber, string name)
     {
         //We are into master client
-        Player p = new Player();
+        /*Player p = new Player();
         p.actorNumber = actorNumber;
         p.answer = int.Parse(answer);
         p.name = name;
@@ -155,10 +163,45 @@ public class Manager : MonoBehaviourPun
                 }
             }
         }
-        #endregion
+        #endregion*/
+        bool exist = false;
+        foreach(Player pl in players)
+        {
+            if(pl.actorNumber == actorNumber)
+            {
+                exist = true;
+                pl.answer = int.Parse(answer);
+                pl.difference = CheckForDifference(pl.answer, questions[questionIndex].Answer);
 
+                ListOfPlayer.text = ListOfPlayer.text + "\n" + "name: " + pl.name + "Answer" + pl.answer;
+                photonView.RPC("RecieveFromMasterClient", RpcTarget.All, pl.answer, pl.actorNumber, questions[questionIndex].Answer, pl.difference);
+            }
+        }
+        if (!exist)
+        {
+            Player pl = new Player();
+            pl.actorNumber = actorNumber;
+            pl.name = name;
+            pl.answer = int.Parse(answer);
+            pl.difference = CheckForDifference(pl.answer, questions[questionIndex].Answer);
+            players.Add(pl);
+
+            photonView.RPC("RecieveFromMasterClient", RpcTarget.All, pl.answer, pl.actorNumber, questions[questionIndex].Answer, pl.difference);
+        }
+       
+        /*foreach (Player p in players)
+        {
+            if(p.actorNumber == actorNumber)
+            {
+                p.answer = int.Parse(answer);
+                p.difference = CheckForDifference(p.answer, questions[questionIndex].Answer);
+
+                ListOfPlayer.text = ListOfPlayer.text + "\n" + "name: " + p.name + "Answer" + p.answer;
+                photonView.RPC("RecieveFromMasterClient", RpcTarget.All, p.answer, p.actorNumber, questions[questionIndex].Answer, p.difference);
+            }
+        }*/
         //QuestionText.text = "Number: " + p.answer + " Send by: " + p.actorNumber + "-Bet: " + p.betAmount;
-        photonView.RPC("RecieveFromMasterClient", RpcTarget.All, p.answer, p.actorNumber, questions[questionIndex].Answer, CheckForDifference(p.answer, questions[questionIndex].Answer));
+        //photonView.RPC("RecieveFromMasterClient", RpcTarget.All, p.answer, p.actorNumber, questions[questionIndex].Answer, CheckForDifference(p.answer, questions[questionIndex].Answer));
     }
 
     [PunRPC]
@@ -176,20 +219,57 @@ public class Manager : MonoBehaviourPun
 
     public void CheckForTheWinner()
     {
-        int diff = players[0].difference;
-        int actorNumber = players[0].actorNumber;
-        foreach(Player p in players)
-        {
-            if(p.difference < diff)
-            {
-                actorNumber = p.actorNumber;
-            }
-        }
+        photonView.RPC("ShortListWinner", RpcTarget.MasterClient, null);
+    }
+    [PunRPC] 
+    public void ShortListWinner()
+    {
+        if (!PhotonNetwork.IsMasterClient) return;
+        QuestionText.text = "";
+        int diff = Int32.MaxValue;
+        int actorNumber = 0;
+
+        ListOfPlayer.text = "We are here";
+
         foreach (Player p in players)
         {
-            if (actorNumber == p.actorNumber)
+            if (p.difference < diff)
             {
-                photonView.RPC("AnnounceWinner", RpcTarget.All, p.actorNumber, p.answer, questions[questionIndex].Answer, CheckForDifference(p.answer, questions[questionIndex].Answer), p.name);
+                actorNumber = p.actorNumber;
+                diff = p.difference;
+                //winner.Add(p);
+            }
+            ListOfPlayer.text = ListOfPlayer + "\n" + "Name: " + p.name + "- Difference: " + p.difference;
+        }
+
+        foreach (Player p in players)
+        {
+            if (p.actorNumber == actorNumber) //To Add the one that was found the smallest in the previous loop
+            {
+                winner.Add(p);
+            }
+            if (p.difference == diff) //To find any other with same differences
+            {
+                winner.Add(p);
+            }
+        }
+        bool win = false;
+        foreach (Player pl in players)
+        {
+            win = false;
+            foreach (Player p in winner)
+            {
+                if(p.actorNumber == pl.actorNumber)
+                {
+                    win = true;
+                    photonView.RPC("AnnounceWinner", RpcTarget.All, p.actorNumber, p.answer, questions[questionIndex].Answer, CheckForDifference(p.answer, questions[questionIndex].Answer), p.name);
+                    Debug.Log("MMaster: Winner is: " + p.name);
+                }
+            }
+            if (!win)
+            {
+                photonView.RPC("AnnounceLoser", RpcTarget.All, pl.actorNumber, pl.answer, questions[questionIndex].Answer, CheckForDifference(pl.answer, questions[questionIndex].Answer), pl.name);
+                Debug.Log("MMaster: Loose is: " + pl.name);
             }
         }
     }
@@ -199,11 +279,72 @@ public class Manager : MonoBehaviourPun
     {
         if (actorNumber == PhotonNetwork.LocalPlayer.ActorNumber)
         {
-            QuestionText.text = "You " + name + " with answer " + answer + "- Correct: " + correctAnswer + "- Difference: " + difference + " WINNER!!!";
+            QuestionText.text = "You  Win" + name + " with answer " + answer + "- Correct: " + correctAnswer + "- Difference: " + difference + " WINNER!!!";
         }
-        else
+        /*else
         {
             QuestionText.text = name + " with answer " + answer + "- Correct: " + correctAnswer + "- Difference: " + difference + "Wins";
+        }*/
+    }
+    [PunRPC]
+    public void AnnounceLoser(int actorNumber, int answer, int correctAnswer, int difference, string name)
+    {
+        if (actorNumber == PhotonNetwork.LocalPlayer.ActorNumber)
+        {
+            QuestionText.text = "You  Loose" + name + " with answer " + answer + "- Correct: " + correctAnswer + "- Difference: " + difference + " WINNER!!!";
+        }
+        /*else
+        {
+            QuestionText.text = name + " with answer " + answer + "- Correct: " + correctAnswer + "- Difference: " + difference + "Wins";
+        }*/
+    }
+
+    public void AddToRoom()
+    {
+        photonView.RPC("AddToMasterClient", RpcTarget.MasterClient, PhotonNetwork.LocalPlayer.ActorNumber, PhotonNetwork.NickName);
+    }
+    [PunRPC]
+    public void AddToMasterClient(int actorNumber, string name)
+    {
+       /* bool exist = false;
+        foreach (Player pl in players)
+        {
+            if(pl.actorNumber == actorNumber)
+            {
+                exist = true;
+            }
+        }
+        if (!exist)*/
+        {
+            Player p = new Player();
+            p.actorNumber = actorNumber;
+            p.name = name;
+            players.Add(p);
+            ListOfPlayer.text = "";
+        }
+        
+        foreach (Player pl in players)
+        {
+            ListOfPlayer.text = ListOfPlayer.text + "\n" + "Name: " + pl.name + " ActorNumber: " + pl.actorNumber;
+            Debug.Log("MMaster: ------------");
+            Debug.Log("MMaster: Player Name: " + pl.name);
+        }
+        //ListOfPlayer.text = ListOfPlayer.text + "/n" + "Name: " + name + " ActorNumber: " + actorNumber;
+    }
+    public void OnClickSetBet()
+    {
+        photonView.RPC("SetBet", RpcTarget.MasterClient, PhotonNetwork.LocalPlayer.ActorNumber, int.Parse(BetAmount.text));
+    }
+    [PunRPC]
+    public void SetBet(int actorNumber, int betAmount)
+    {
+        foreach(Player p in players)
+        {
+            if(p.actorNumber == actorNumber)
+            {
+                p.betAmount = betAmount;
+                QuestionText.text = "\n" + p.actorNumber + " - Bet: " + betAmount;
+            }
         }
     }
 }

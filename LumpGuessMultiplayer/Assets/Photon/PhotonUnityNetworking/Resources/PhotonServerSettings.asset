@@ -44,6 +44,11 @@ MonoBehaviour:
   - SendToMasterClient
   - RecieveFromMasterClient
   - AnnounceWinner
+  - AddToRoom
+  - AddToMasterClient
+  - SetBet
+  - ShortListWinner
+  - AnnounceLoser
   DisableAutoOpenWizard: 1
   ShowSettings: 1
   DevRegionSetOnce: 1
