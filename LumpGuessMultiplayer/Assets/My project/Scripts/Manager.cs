@@ -16,7 +16,7 @@ public class Player
 {
     public string name;
     public int answer;
-    public int betAmount;
+    public int betAmount = 0;
     public int actorNumber;
     public int difference; //Set by master client only
     public bool replied;
@@ -32,7 +32,7 @@ public class Manager : MonoBehaviourPun
     [SerializeField] PhotonView pv;
 
     [SerializeField] GameObject QuestionBox;
-    [SerializeField] GameObject ResultBox;
+    [SerializeField] GameObject SummaryScreen;
 
     [SerializeField] Text QuestionText;
     [SerializeField] Text SummaryQuestionText;
@@ -162,7 +162,7 @@ public class Manager : MonoBehaviourPun
     public void OnClickDisplayQuestion()
     {
         ShowQuestionButton.SetActive(false);
-        CheckForWinnerButton.SetActive(true);
+        //CheckForWinnerButton.SetActive(true);
 
         //questionIndex = UnityEngine.Random.Range(0, questions.Length - 1);
         //questionIndex = 0;
@@ -205,6 +205,8 @@ public class Manager : MonoBehaviourPun
     public void OnSubmitAnswerButton()
     {
         WaitingForOtherPlayerImage.SetActive(true);
+
+        
         //pv.RPC("SendToMasterClient", RpcTarget.All, Answer.text, PhotonNetwork.LocalPlayer.ActorNumber);
         /*if (PhotonNetwork.IsMasterClient)
         {
@@ -215,48 +217,43 @@ public class Manager : MonoBehaviourPun
         else*/
         {
             //PhotonView photonView = PhotonView.Get(this);
-            photonView.RPC("SendToMasterClient", RpcTarget.MasterClient, AnswerTF.text, betAmount, PhotonNetwork.LocalPlayer.ActorNumber, PhotonNetwork.NickName);
+            photonView.RPC("SendAnswerToAll", RpcTarget.All, AnswerTF.text, PhotonNetwork.LocalPlayer.ActorNumber, betAmount, PhotonNetwork.NickName);
         }
     }
     [PunRPC]
-    public void SendToMasterClient(string answer, int actorNumber, int bet, string name)
+    public void SendAnswerToAll(string answer, int actorNumber, int bet, string name)
     {
-        //We are into master client
-        /*Player p = new Player();
-        p.actorNumber = actorNumber;
-        p.answer = int.Parse(answer);
-        p.name = name;
-        p.betAmount = 10;
-        p.difference = CheckForDifference(p.answer, questions[questionIndex].Answer);
-
-        #region If player already exists
-        bool playerexist = false;
-        foreach (Player pl in players)
+        if (PhotonNetwork.IsMasterClient)
         {
-            if(pl.actorNumber == p.actorNumber)
+            if(actorNumber == PhotonNetwork.LocalPlayer.ActorNumber)
             {
-                playerexist = true;
+                Player1NameSummaryScreen.text = name;
+                Player1AnswerSummaryScreen.text = answer;
+                Player1BetSummaryScreen.text = bet.ToString();
             }
-        }
-        if (!playerexist)
-        {
-            players.Add(p);
+            else
+            {
+                Player2NameSummaryScreen.text = name;
+                Player2AnswerSummaryScreen.text = answer;
+                Player2BetSummaryScreen.text = bet.ToString();
+            }
+            
         }
         else
         {
-            foreach (Player pl in players)
+            if (actorNumber == PhotonNetwork.LocalPlayer.ActorNumber)
             {
-                if (pl.actorNumber == p.actorNumber)
-                {
-                    //pl.actorNumber = actorNumber;
-                    pl.answer = int.Parse(answer);
-                    pl.name = name;
-                    pl.betAmount = 10;
-                    CheckForDifference(pl.answer, questions[questionIndex].Answer);
-                }
+                Player2NameSummaryScreen.text = name;
+                Player2AnswerSummaryScreen.text = answer;
+                Player2BetSummaryScreen.text = bet.ToString();
+            }
+            else
+            {
+                Player1NameSummaryScreen.text = name;
+                Player1AnswerSummaryScreen.text = answer;
+                Player1BetSummaryScreen.text = bet.ToString();
             }
         }
-        #endregion*/
         bool exist = false;
         foreach(Player pl in players)
         {
@@ -268,7 +265,7 @@ public class Manager : MonoBehaviourPun
                 pl.betAmount = bet;
 
                 ListOfPlayer.text = ListOfPlayer.text + "\n" + "name: " + pl.name + "Answer" + pl.answer;
-                photonView.RPC("RecieveFromMasterClient", RpcTarget.All, pl.answer, pl.actorNumber, questions[questionIndex].Answer, pl.difference);
+                //photonView.RPC("RecieveFromMasterClient", RpcTarget.All, pl.answer, pl.actorNumber, questions[questionIndex].Answer, pl.difference);
             }
         }
         if (!exist)
@@ -281,23 +278,33 @@ public class Manager : MonoBehaviourPun
             pl.betAmount = bet;
             players.Add(pl);
 
-            photonView.RPC("RecieveFromMasterClient", RpcTarget.All, pl.answer, pl.actorNumber, questions[questionIndex].Answer, pl.difference);
+            //photonView.RPC("RecieveFromMasterClient", RpcTarget.All, pl.answer, pl.actorNumber, questions[questionIndex].Answer, pl.difference);
         }
 
-        /*foreach (Player p in players)
+        #region Check if everybody Answered
+        if (PhotonNetwork.IsMasterClient)
         {
-            if(p.actorNumber == actorNumber)
+            bool allAnswered = true;
+            foreach (Player p in players)
             {
-                p.answer = int.Parse(answer);
-                p.difference = CheckForDifference(p.answer, questions[questionIndex].Answer);
-
-                ListOfPlayer.text = ListOfPlayer.text + "\n" + "name: " + p.name + "Answer" + p.answer;
-                photonView.RPC("RecieveFromMasterClient", RpcTarget.All, p.answer, p.actorNumber, questions[questionIndex].Answer, p.difference);
+                if (p.betAmount == 0)
+                {
+                    allAnswered = false;
+                    Debug.Log("Bet: " + p.betAmount + " Not by: " + p.name);
+                }
             }
-        }*/
-        //QuestionText.text = "Number: " + p.answer + " Send by: " + p.actorNumber + "-Bet: " + p.betAmount;
-        //photonView.RPC("RecieveFromMasterClient", RpcTarget.All, p.answer, p.actorNumber, questions[questionIndex].Answer, CheckForDifference(p.answer, questions[questionIndex].Answer));
-        //CheckForTheWinner();
+            if (allAnswered)
+            {
+                WaitingForOtherPlayerImage.SetActive(false);
+                CheckForWinnerButton.SetActive(true);
+            }
+            else
+            {
+                CheckForWinnerButton.SetActive(false);
+                //WaitingForOtherPlayerImage.SetActive(true);
+            }
+        }
+        #endregion
     }
 
     [PunRPC]
@@ -314,13 +321,26 @@ public class Manager : MonoBehaviourPun
     }
     public void CheckForTheWinner()
     {
+        //WaitingForOtherPlayerImage.SetActive(false);
+        photonView.RPC("DisplaySummaryScreen", RpcTarget.All);
+    }
+    [PunRPC]
+    public void DisplaySummaryScreen()
+    {
+        QuestionBox.SetActive(false);
         WaitingForOtherPlayerImage.SetActive(false);
-        photonView.RPC("ShortListWinner", RpcTarget.MasterClient, null);
+        CheckForWinnerButton.SetActive(false);
+        SummaryScreen.SetActive(true);
+    }
+
+    public void DisplayResults() //To be called on a button
+    {
+        photonView.RPC("ShortListWinner", RpcTarget.AllBuffered, null);
     }
     [PunRPC] 
     public void ShortListWinner()
     {
-        if (!PhotonNetwork.IsMasterClient) return;
+        //if (!PhotonNetwork.IsMasterClient) return;
         QuestionText.text = "";
         int diff = Int32.MaxValue;
         int actorNumber = 0;
@@ -377,7 +397,7 @@ public class Manager : MonoBehaviourPun
         {
             QuestionText.text = "You  Win" + name + " with answer " + answer + "- Correct: " + correctAnswer + "- Difference: " + difference + " WINNER!!!";
             QuestionBox.SetActive(false);
-            ResultBox.SetActive(true);
+            //SummaryScreen.SetActive(true);
         }
 
         /*else
@@ -392,7 +412,7 @@ public class Manager : MonoBehaviourPun
         {
             QuestionText.text = "You  Loose" + name + " with answer " + answer + "- Correct: " + correctAnswer + "- Difference: " + difference + " WINNER!!!";
             QuestionBox.SetActive(false);
-            ResultBox.SetActive(true);
+            //SummaryScreen.SetActive(true);
         }
         /*else
         {
@@ -402,7 +422,7 @@ public class Manager : MonoBehaviourPun
 
     public void AddToRoom()
     {
-        photonView.RPC("AddToMasterClient", RpcTarget.All, PhotonNetwork.LocalPlayer.ActorNumber, PhotonNetwork.NickName);
+        photonView.RPC("AddToMasterClient", RpcTarget.AllBuffered, PhotonNetwork.LocalPlayer.ActorNumber, PhotonNetwork.NickName);
     }
     [PunRPC]
     public void AddToMasterClient(int actorNumber, string name)
