@@ -26,6 +26,9 @@ public class Manager : MonoBehaviourPun
     [SerializeField] GameObject PlayerPrefab;
     [SerializeField] GameObject ShowQuestionButton;
 
+    [SerializeField] GameObject Slot1;
+    [SerializeField] GameObject Slot2;
+
     [SerializeField] PhotonView pv;
 
     [SerializeField] GameObject QuestionBox;
@@ -91,9 +94,71 @@ public class Manager : MonoBehaviourPun
     void SpawnPlayer()
     {
         int r = UnityEngine.Random.Range(-8, 8);
-        Vector3 pos = new Vector3(PlayerPrefab.transform.position.x + r, PlayerPrefab.transform.position.y - 3, PlayerPrefab.transform.position.z);
-        PhotonNetwork.Instantiate(PlayerPrefab.name, pos, PlayerPrefab.transform.rotation);
+        Vector3 pos;
+        //if (Slot1.transform.childCount == 0)
+        if (PhotonNetwork.IsMasterClient)
+            {
+            //pos = new Vector3(114.5f, 76, 0);
+            pos = new Vector3(0, 0, 0);
+            GameObject g = PhotonNetwork.Instantiate(PlayerPrefab.name, pos, PlayerPrefab.transform.rotation);
+            g.GetComponent<MyPlayer>().SetParentAcrossNetwork(Slot1.GetComponent<PhotonView>().ViewID);
+            g.GetComponent<MyPlayer>().AssignPosition(-200, 76, 0);
+            Debug.Log("MMM: Slot Instantiated");
+
+            /*g.transform.SetParent(Slot1.transform);
+            photonView.RPC("SyncParent", RpcTarget.OthersBuffered, Slot1.GetComponent<PhotonView>().ViewID);
+            Debug.Log("MMM: Slot1: InstantiatedObjName:" + g.gameObject.name + "\n" + "PhotonViewID: " + Slot1.GetComponent<PhotonView>().ViewID);
+            Debug.Log("MMM: SlotCount - " + Slot1.transform.childCount);*/
+        }
+        else
+        {
+            //pos = new Vector3(100, 76, 0);
+            pos = new Vector3(0, 0, 0);
+            GameObject g = PhotonNetwork.Instantiate(PlayerPrefab.name, pos, PlayerPrefab.transform.rotation);
+            g.GetComponent<MyPlayer>().SetParentAcrossNetwork(Slot2.GetComponent<PhotonView>().ViewID);
+            g.GetComponent<MyPlayer>().AssignPosition(200, 76, 0);
+
+            /*g.transform.SetParent(Slot2.transform);
+            photonView.RPC("SyncParent", RpcTarget.OthersBuffered, Slot2.GetComponent<PhotonView>().ViewID);
+            Debug.Log("MMM: Slot2: InstantiatedObjName:" + g.gameObject.name + "\n" + "PhotonViewID: " + Slot2.GetComponent<PhotonView>().ViewID);*/
+        }
+
+
+        /*if (Slot1.transform.childCount > 0)
+        {
+            g.transform.parent = Slot1.transform;
+            Slot1.GetComponent<SyncChild>().SyncParent();
+        }
+        else
+        {
+            g.transform.parent = Slot2.transform;
+            Slot2.GetComponent<SyncChild>().SyncParent();
+        }*/
     }
+    /*[PunRPC]
+    void SyncParent(int parentViewID)
+    {
+        // Find the parent object using the ViewID received from the network
+        PhotonView parentView = PhotonView.Find(parentViewID);
+        Transform parentTransform = parentView.transform;
+
+        // Set the parent on all networked instances
+        transform.SetParent(parentTransform);
+    }*/
+    /*[PunRPC]
+    void SetParent(int viewId, int parentViewId)
+    {
+        // Find the instantiated object and its intended parent
+        PhotonView childView = PhotonView.Find(viewId);
+        PhotonView parentView = PhotonView.Find(parentViewId);
+
+        // Check if both views are valid
+        if (childView != null && parentView != null)
+        {
+            // Set the parent of the child
+            childView.transform.SetParent(parentView.transform);
+        }
+    }*/
     public void OnClickDisplayQuestion()
     {
         ShowQuestionButton.SetActive(false);
