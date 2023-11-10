@@ -1,0 +1,28 @@
+fileFormatVersion: 2
+guid: ad34b6c5dcc7c497498accd932fd2eb7
+TrueTypeFontImporter:
+  externalObjects: {}
+  serializedVersion: 4
+  fontSize: 16
+  forceTextureCase: -2
+  characterSpacing: 0
+  characterPadding: 1
+  includeFontData: 1
+  fontNames:
+  - RooneySans
+  fallbackFontReferences:
+  - {fileID: 12800000, guid: 029f0b21dd562400ca2444efe4985dc6, type: 3}
+  - {fileID: 12800000, guid: 8d70d3cadb09441cc8e908b6983121c2, type: 3}
+  - {fileID: 12800000, guid: 081572fa6c73d43cb8b66c14701bbb78, type: 3}
+  - {fileID: 12800000, guid: 97ef3ebc88d9b4cf6bd691bb39d22355, type: 3}
+  - {fileID: 12800000, guid: aceca7ba2763d4aa088aaf209d01d4ea, type: 3}
+  - {fileID: 12800000, guid: 94f25a58577ca40ccbfbbc7660104d21, type: 3}
+  - {fileID: 12800000, guid: a4c937ef42ad64c45b844ffd44ba5108, type: 3}
+  customCharacters: 
+  fontRenderingMode: 0
+  ascentCalculationMode: 1
+  useLegacyBoundsCalculation: 0
+  shouldRoundAdvanceValue: 1
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
