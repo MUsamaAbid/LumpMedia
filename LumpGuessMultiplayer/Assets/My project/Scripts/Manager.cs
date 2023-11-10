@@ -337,7 +337,7 @@ public class Manager : MonoBehaviourPun
 
     public void AddToRoom()
     {
-        photonView.RPC("AddToMasterClient", RpcTarget.MasterClient, PhotonNetwork.LocalPlayer.ActorNumber, PhotonNetwork.NickName);
+        photonView.RPC("AddToMasterClient", RpcTarget.All, PhotonNetwork.LocalPlayer.ActorNumber, PhotonNetwork.NickName);
     }
     [PunRPC]
     public void AddToMasterClient(int actorNumber, string name)
@@ -358,13 +358,13 @@ public class Manager : MonoBehaviourPun
             players.Add(p);
             ListOfPlayer.text = "";
 
-            if (photonView.IsMine)
+            if (PhotonNetwork.IsMasterClient)
             {
-                Name1.text = PhotonNetwork.NickName;
+                Name1.text = pv.Owner.NickName;
             }
             else
             {
-                Name1.text = pv.Owner.NickName;
+                Name2.text = PhotonNetwork.NickName;
             }
         }
         
