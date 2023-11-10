@@ -11,7 +11,7 @@ public class Launcher : MonoBehaviourPunCallbacks
 
     private void Start()
     {
-        Application.targetFrameRate = 30;
+        Application.targetFrameRate = 20;
     }
     public void OnClickConnectButton()
     {

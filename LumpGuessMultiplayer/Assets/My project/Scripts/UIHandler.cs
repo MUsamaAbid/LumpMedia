@@ -13,7 +13,7 @@ public class UIHandler : MonoBehaviourPunCallbacks
 
     public void OnClickCreateRoom()
     {
-        PhotonNetwork.CreateRoom(CreateRoomTF.text, new RoomOptions { MaxPlayers = 6 }, null);
+        PhotonNetwork.CreateRoom(CreateRoomTF.text, new RoomOptions { MaxPlayers = 2 }, null);
     }
     public void OnClickJoinRoom()
     {
