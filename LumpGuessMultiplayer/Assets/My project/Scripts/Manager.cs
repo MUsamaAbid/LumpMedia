@@ -33,10 +33,13 @@ public class Manager : MonoBehaviourPun
 
     [SerializeField] GameObject QuestionBox;
     [SerializeField] GameObject SummaryScreen;
+    [SerializeField] GameObject ResultScreen;
 
     [SerializeField] Text QuestionText;
     [SerializeField] Text SummaryQuestionText;
     [SerializeField] Text SummaryAnswer;
+    [SerializeField] Text WhoWonText;
+    [SerializeField] Text BetAmountWin;
 
     [SerializeField] InputField AnswerTF;
     [SerializeField] Button SubmitAnswerButton;
@@ -337,15 +340,15 @@ public class Manager : MonoBehaviourPun
     {
         photonView.RPC("ShortListWinner", RpcTarget.AllBuffered, null);
     }
-    [PunRPC] 
+   
     public void ShortListWinner()
     {
         //if (!PhotonNetwork.IsMasterClient) return;
-        QuestionText.text = "";
+        //QuestionText.text = "";
         int diff = Int32.MaxValue;
         int actorNumber = 0;
 
-        ListOfPlayer.text = "We are here";
+        //ListOfPlayer.text = "We are here";
 
         foreach (Player p in players)
         {
