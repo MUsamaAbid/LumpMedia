@@ -6613,9 +6613,11 @@ MonoBehaviour:
   ListOfPlayer: {fileID: 2146726496}
   Name1: {fileID: 638622789}
   Name2: {fileID: 947419448}
+  Player1Summary: {fileID: 1502212336}
   Player1NameSummaryScreen: {fileID: 1689842378}
   Player1BetSummaryScreen: {fileID: 2139203537}
   Player1AnswerSummaryScreen: {fileID: 2081815831}
+  Player2Summary: {fileID: 734513395}
   Player2NameSummaryScreen: {fileID: 119313813}
   Player2BetSummaryScreen: {fileID: 1658106071}
   Player2AnswerSummaryScreen: {fileID: 468116011}

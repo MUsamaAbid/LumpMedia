@@ -69,10 +69,12 @@ public class Manager : MonoBehaviourPun
     [SerializeField] Text Name1;
     [SerializeField] Text Name2;
 
+    [SerializeField] GameObject Player1Summary;
     [SerializeField] Text Player1NameSummaryScreen;
     [SerializeField] Text Player1BetSummaryScreen;
     [SerializeField] Text Player1AnswerSummaryScreen;
 
+    [SerializeField] GameObject Player2Summary;
     [SerializeField] Text Player2NameSummaryScreen;
     [SerializeField] Text Player2BetSummaryScreen;
     [SerializeField] Text Player2AnswerSummaryScreen;
@@ -94,6 +96,8 @@ public class Manager : MonoBehaviourPun
         {
             ShowQuestionButton.SetActive(false);
         }*/
+        Player1Summary.SetActive(false);
+        Player2Summary.SetActive(false);
         OnClickDisplayQuestion();
     }
     void SpawnPlayer()
@@ -235,14 +239,16 @@ public class Manager : MonoBehaviourPun
                 Player1NameSummaryScreen.text = name;
                 Player1AnswerSummaryScreen.text = answer;
                 Player1BetSummaryScreen.text = bet.ToString();
+                Player1Summary.SetActive(true);
             }
             else
             {
                 Player2NameSummaryScreen.text = name;
                 Player2AnswerSummaryScreen.text = answer;
                 Player2BetSummaryScreen.text = bet.ToString();
+                Player2Summary.SetActive(true);
             }
-            
+
         }
         else
         {
@@ -251,12 +257,14 @@ public class Manager : MonoBehaviourPun
                 Player2NameSummaryScreen.text = name;
                 Player2AnswerSummaryScreen.text = answer;
                 Player2BetSummaryScreen.text = bet.ToString();
+                Player2Summary.SetActive(true);
             }
             else
             {
                 Player1NameSummaryScreen.text = name;
                 Player1AnswerSummaryScreen.text = answer;
                 Player1BetSummaryScreen.text = bet.ToString();
+                Player1Summary.SetActive(true);
             }
         }
         bool exist = false;
