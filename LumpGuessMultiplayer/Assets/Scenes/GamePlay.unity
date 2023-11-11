@@ -5021,7 +5021,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1539356977}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 2040910565}
+        m_TargetAssemblyTypeName: Manager, Assembly-CSharp
+        m_MethodName: NextRound
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &1539356977
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6621,6 +6633,8 @@ MonoBehaviour:
   Player2NameSummaryScreen: {fileID: 119313813}
   Player2BetSummaryScreen: {fileID: 1658106071}
   Player2AnswerSummaryScreen: {fileID: 468116011}
+  FightAgainButton: {fileID: 1539356974}
+  RoundText: {fileID: 189303838}
 --- !u!4 &2040910566
 Transform:
   m_ObjectHideFlags: 0

@@ -79,110 +79,92 @@ public class Manager : MonoBehaviourPun
     [SerializeField] Text Player2BetSummaryScreen;
     [SerializeField] Text Player2AnswerSummaryScreen;
 
+    [SerializeField] GameObject FightAgainButton;
+
+    [SerializeField] Text RoundText;
+    int round;
+
     private void Start()
     {
-        questionIndex = 2;
+        round = 1;
+        RoundText.text = "ROUND " + round.ToString();
+        //questionIndex = 2;
         betAmount = 0;
 
         players = new List<Player>();
         winner = new List<Player>();
 
         SpawnPlayer();
-        /*if (PhotonNetwork.IsMasterClient)
+
+        Player1Summary.SetActive(false);
+        Player2Summary.SetActive(false);
+
+        if (PhotonNetwork.IsMasterClient)
         {
-            ShowQuestionButton.SetActive(true);
+            FightAgainButton.SetActive(true);
         }
         else
         {
-            ShowQuestionButton.SetActive(false);
-        }*/
-        Player1Summary.SetActive(false);
-        Player2Summary.SetActive(false);
+            FightAgainButton.SetActive(false);
+        }
+
         OnClickDisplayQuestion();
     }
     void SpawnPlayer()
     {
-        int r = UnityEngine.Random.Range(-8, 8);
         Vector3 pos;
-        //if (Slot1.transform.childCount == 0)
         if (PhotonNetwork.IsMasterClient)
-            {
-            //pos = new Vector3(114.5f, 76, 0);
+        {
             pos = new Vector3(0, 0, 0);
             GameObject g = PhotonNetwork.Instantiate(PlayerPrefab.name, pos, PlayerPrefab.transform.rotation);
             g.GetComponent<MyPlayer>().SetParentAcrossNetwork(Slot1.GetComponent<PhotonView>().ViewID);
             g.GetComponent<MyPlayer>().AssignPosition(-200, 76, 0);
-            Debug.Log("MMM: Slot Instantiated");
-
-            /*g.transform.SetParent(Slot1.transform);
-            photonView.RPC("SyncParent", RpcTarget.OthersBuffered, Slot1.GetComponent<PhotonView>().ViewID);
-            Debug.Log("MMM: Slot1: InstantiatedObjName:" + g.gameObject.name + "\n" + "PhotonViewID: " + Slot1.GetComponent<PhotonView>().ViewID);
-            Debug.Log("MMM: SlotCount - " + Slot1.transform.childCount);*/
         }
         else
         {
-            //pos = new Vector3(100, 76, 0);
             pos = new Vector3(0, 0, 0);
             GameObject g = PhotonNetwork.Instantiate(PlayerPrefab.name, pos, PlayerPrefab.transform.rotation);
             g.GetComponent<MyPlayer>().SetParentAcrossNetwork(Slot2.GetComponent<PhotonView>().ViewID);
             g.GetComponent<MyPlayer>().AssignPosition(200, 76, 0);
-
-            /*g.transform.SetParent(Slot2.transform);
-            photonView.RPC("SyncParent", RpcTarget.OthersBuffered, Slot2.GetComponent<PhotonView>().ViewID);
-            Debug.Log("MMM: Slot2: InstantiatedObjName:" + g.gameObject.name + "\n" + "PhotonViewID: " + Slot2.GetComponent<PhotonView>().ViewID);*/
         }
-
-
-        /*if (Slot1.transform.childCount > 0)
-        {
-            g.transform.parent = Slot1.transform;
-            Slot1.GetComponent<SyncChild>().SyncParent();
-        }
-        else
-        {
-            g.transform.parent = Slot2.transform;
-            Slot2.GetComponent<SyncChild>().SyncParent();
-        }*/
     }
-    /*[PunRPC]
-    void SyncParent(int parentViewID)
-    {
-        // Find the parent object using the ViewID received from the network
-        PhotonView parentView = PhotonView.Find(parentViewID);
-        Transform parentTransform = parentView.transform;
-
-        // Set the parent on all networked instances
-        transform.SetParent(parentTransform);
-    }*/
-    /*[PunRPC]
-    void SetParent(int viewId, int parentViewId)
-    {
-        // Find the instantiated object and its intended parent
-        PhotonView childView = PhotonView.Find(viewId);
-        PhotonView parentView = PhotonView.Find(parentViewId);
-
-        // Check if both views are valid
-        if (childView != null && parentView != null)
-        {
-            // Set the parent of the child
-            childView.transform.SetParent(parentView.transform);
-        }
-    }*/
+    
     public void OnClickDisplayQuestion()
     {
         ShowQuestionButton.SetActive(false);
-        //CheckForWinnerButton.SetActive(true);
 
         //questionIndex = UnityEngine.Random.Range(0, questions.Length - 1);
         //questionIndex = 0;
-        QuestionText.text = questions[questionIndex].Question;
-        SummaryQuestionText.text = questions[questionIndex].Question;
-        SummaryAnswer.text = questions[questionIndex].Answer.ToString();
 
-        QuestionBox.SetActive(true);
+        if (PhotonNetwork.IsMasterClient)
+        {
+            questionIndex = UnityEngine.Random.Range(0, questions.Length - 1);
+            //questionIndex = 6;
+            pv.RPC("SetQuestionIndex", RpcTarget.AllBuffered, questionIndex);
+            QuestionText.text = questions[questionIndex].Question;
+            SummaryQuestionText.text = questions[questionIndex].Question;
+            SummaryAnswer.text = questions[questionIndex].Answer.ToString();
 
-        pv.RPC("DisplayQuestion", RpcTarget.Others); //Not all because we are already flipping it locally
-        pv.RPC("EnableQuestionBox", RpcTarget.Others); //Not all because we are already flipping it locally
+            QuestionBox.SetActive(true);
+        }
+        else
+        {
+            pv.RPC("AskForQuestionIndex", RpcTarget.MasterClient);
+        }
+
+        
+    }
+    [PunRPC]
+    void AskForQuestionIndex()
+    {
+        pv.RPC("SetQuestionIndex", RpcTarget.AllBuffered, questionIndex);
+    }
+    [PunRPC]
+    public void SetQuestionIndex(int index)
+    {
+        questionIndex = index;
+        pv.RPC("DisplayQuestion", RpcTarget.All);
+        pv.RPC("EnableQuestionBox", RpcTarget.All);
     }
     [PunRPC]
     void DisplayQuestion()
@@ -541,8 +523,45 @@ public class Manager : MonoBehaviourPun
             Debug.Log("Bet 50");
         }
     }
+    public void StartNextRound()
+    {
+        photonView.RPC("NextRound", RpcTarget.AllBuffered);
+    }
+    [PunRPC]
+    public void NextRound()
+    {
+        foreach(Player p in players)
+        {
+            betAmount = 0;
+            p.answer = 0;
+            p.difference = 0;
+        }
+
+        Bet10.gameObject.transform.GetChild(0).GetComponent<Image>().enabled = false;
+        Bet25.gameObject.transform.GetChild(0).GetComponent<Image>().enabled = false;
+        Bet50.gameObject.transform.GetChild(0).GetComponent<Image>().enabled = false;
+
+        SummaryScreen.SetActive(false);
+        Debug.Log("SummaryScreenDisabled: " + SummaryScreen.activeSelf);
+        ResultScreen.SetActive(false);
+        Debug.Log("ResultScreenDisabled: " + ResultScreen.activeSelf);
+        CheckForWinnerButton.SetActive(false);
+        WaitingForOtherPlayerImage.SetActive(false);
+        Player1Summary.SetActive(false);
+        Player2Summary.SetActive(false);
+        PvPScreen.SetActive(true);
+        QuestionBox.SetActive(true);
+
+        AnswerTF.text = null;
+
+        //round ++;
+        //RoundText.text = "ROUND " + round.ToString();
+
+        OnClickDisplayQuestion();
+    }
     public void GoToHomePage()
     {
+        PhotonNetwork.LeaveRoom();
         PhotonNetwork.LoadLevel(0);
     }
 }

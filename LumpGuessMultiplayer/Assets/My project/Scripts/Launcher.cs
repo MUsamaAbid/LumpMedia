@@ -24,6 +24,7 @@ public class Launcher : MonoBehaviourPunCallbacks
             BgNameScreen.SetActive(false);
             ConnectedScreen.SetActive(true);
             BgRoomSelectionScreen.SetActive(true);
+            PhotonNetwork.ConnectUsingSettings();
             playerNameText.text = PhotonNetwork.NickName;
             // You can perform additional actions here if needed
         }

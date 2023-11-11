@@ -55,6 +55,9 @@ MonoBehaviour:
   - SendAnswerToAll
   - DisplaySummaryScreen
   - CalculateResults
+  - SetQuestionIndex
+  - AskForQuestionIndex
+  - NextRound
   DisableAutoOpenWizard: 1
   ShowSettings: 1
   DevRegionSetOnce: 1
