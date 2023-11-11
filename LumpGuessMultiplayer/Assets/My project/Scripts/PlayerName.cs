@@ -9,6 +9,7 @@ public class PlayerName : MonoBehaviour
     [SerializeField] InputField PlayerNameTF;
     [SerializeField] Button SetPlayerNameButton;
 
+    [SerializeField] Text playerNameText;
     public void OnPlayerNameTFChange()
     {
         if(PlayerNameTF.text.Length > 3)
@@ -23,5 +24,6 @@ public class PlayerName : MonoBehaviour
     public void OnClickSetPlayerName()
     {
         PhotonNetwork.NickName = PlayerNameTF.text;
+        playerNameText.text = PhotonNetwork.NickName;
     }
 }

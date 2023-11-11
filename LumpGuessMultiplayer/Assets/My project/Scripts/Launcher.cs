@@ -3,15 +3,30 @@ using System.Collections.Generic;
 using UnityEngine;
 using Photon.Pun;
 using Photon.Realtime;
+using UnityEngine.UI;
 
 public class Launcher : MonoBehaviourPunCallbacks
 {
     [SerializeField] GameObject ConnectedScreen;
     [SerializeField] GameObject DisconnectedScreen;
 
+    [SerializeField] GameObject BgNameScreen;
+    [SerializeField] GameObject BgRoomSelectionScreen;
+
+    [SerializeField] Text playerNameText;
+
     private void Start()
     {
         Application.targetFrameRate = 20;
+        if (PhotonNetwork.IsConnected)
+        {
+            DisconnectedScreen.SetActive(false);
+            BgNameScreen.SetActive(false);
+            ConnectedScreen.SetActive(true);
+            BgRoomSelectionScreen.SetActive(true);
+            playerNameText.text = PhotonNetwork.NickName;
+            // You can perform additional actions here if needed
+        }
     }
     public void OnClickConnectButton()
     {

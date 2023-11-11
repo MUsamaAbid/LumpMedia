@@ -2477,6 +2477,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ConnectedScreen: {fileID: 75492547}
   DisconnectedScreen: {fileID: 1082356372}
+  BgNameScreen: {fileID: 518660866}
+  BgRoomSelectionScreen: {fileID: 1524278480}
+  playerNameText: {fileID: 527506189}
 --- !u!114 &599488759
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2505,6 +2508,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   PlayerNameTF: {fileID: 654752579}
   SetPlayerNameButton: {fileID: 698532965}
+  playerNameText: {fileID: 527506189}
 --- !u!1 &611056452
 GameObject:
   m_ObjectHideFlags: 0
