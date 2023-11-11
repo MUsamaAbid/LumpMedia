@@ -86,7 +86,7 @@ public class Manager : MonoBehaviourPun
 
     private void Start()
     {
-        round = 1;
+        round = 0;
         RoundText.text = "ROUND " + round.ToString();
         //questionIndex = 2;
         betAmount = 0;
@@ -131,13 +131,23 @@ public class Manager : MonoBehaviourPun
     
     public void OnClickDisplayQuestion()
     {
+        round = 0;
+        RoundText.text = "ROUND " + round.ToString();
+        Next();
+        
         ShowQuestionButton.SetActive(false);
 
         //questionIndex = UnityEngine.Random.Range(0, questions.Length - 1);
         //questionIndex = 0;
-
+        betAmount = 0;
         if (PhotonNetwork.IsMasterClient)
         {
+            foreach (Player p in players)
+            {
+                p.betAmount = 0;
+                p.answer = 0;
+                p.difference = 0;
+            }
             questionIndex = UnityEngine.Random.Range(0, questions.Length - 1);
             //questionIndex = 6;
             pv.RPC("SetQuestionIndex", RpcTarget.AllBuffered, questionIndex);
@@ -190,7 +200,9 @@ public class Manager : MonoBehaviourPun
     [PunRPC]
     void EnableQuestionBox()
     {
+        EmptyEverything();
         QuestionBox.SetActive(true);
+        Debug.Log("Question Box activated");
     }
 
     public void OnSubmitAnswerButton()
@@ -286,6 +298,10 @@ public class Manager : MonoBehaviourPun
                 {
                     allAnswered = false;
                     Debug.Log("Bet: " + p.betAmount + " Not by: " + p.name);
+                }
+                else
+                {
+                    Debug.Log("Bettt: " + p.betAmount + "by: " + p.name);
                 }
             }
             if (allAnswered)
@@ -525,40 +541,58 @@ public class Manager : MonoBehaviourPun
     }
     public void StartNextRound()
     {
-        photonView.RPC("NextRound", RpcTarget.AllBuffered);
+        NextRound();
+
+        pv.RPC("NextRound", RpcTarget.Others);
     }
     [PunRPC]
     public void NextRound()
     {
-        foreach(Player p in players)
-        {
-            betAmount = 0;
-            p.answer = 0;
-            p.difference = 0;
-        }
+        Next();
 
+        OnClickDisplayQuestion();
+    }
+    void Next()
+    {
+        EmptyEverything();
+        //QuestionBox.SetActive(true);
+        Debug.Log("Here");
+
+        AnswerTF.text = null;
+        Debug.Log("Here");
+
+        //round++;
+        RoundText.text = "ROUND " + round.ToString();
+
+        Debug.Log("Here");
+
+    }
+
+    private void EmptyEverything()
+    {
+        Debug.Log("Here");
         Bet10.gameObject.transform.GetChild(0).GetComponent<Image>().enabled = false;
         Bet25.gameObject.transform.GetChild(0).GetComponent<Image>().enabled = false;
         Bet50.gameObject.transform.GetChild(0).GetComponent<Image>().enabled = false;
+        Debug.Log("Here");
 
         SummaryScreen.SetActive(false);
-        Debug.Log("SummaryScreenDisabled: " + SummaryScreen.activeSelf);
+        //Debug.Log("SummaryScreenDisabled: " + SummaryScreen.activeSelf);
         ResultScreen.SetActive(false);
-        Debug.Log("ResultScreenDisabled: " + ResultScreen.activeSelf);
+        //Debug.Log("ResultScreenDisabled: " + ResultScreen.activeSelf);
         CheckForWinnerButton.SetActive(false);
         WaitingForOtherPlayerImage.SetActive(false);
         Player1Summary.SetActive(false);
         Player2Summary.SetActive(false);
         PvPScreen.SetActive(true);
-        QuestionBox.SetActive(true);
-
-        AnswerTF.text = null;
-
-        //round ++;
-        //RoundText.text = "ROUND " + round.ToString();
-
-        OnClickDisplayQuestion();
+        foreach (Player p in players)
+        {
+            betAmount = 0;
+            p.answer = 0;
+            p.difference = 0;
+        }
     }
+
     public void GoToHomePage()
     {
         PhotonNetwork.LeaveRoom();
