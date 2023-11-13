@@ -20,7 +20,8 @@ public class Player
     public int betAmount = 0;
     public int actorNumber;
     public int difference; //Set by master client only
-    public bool replied;
+    public int reward;
+    public bool answered = false;
 }
 public class Manager : MonoBehaviourPun
 {
@@ -144,7 +145,8 @@ public class Manager : MonoBehaviourPun
         {
             foreach (Player p in players)
             {
-                p.betAmount = 0;
+                p.answered = false;
+                //p.betAmount = 0;
                 p.answer = 0;
                 p.difference = 0;
             }
@@ -179,8 +181,6 @@ public class Manager : MonoBehaviourPun
     [PunRPC]
     void DisplayQuestion()
     {
-        //QuestionText.text = "This is the question";
-        //questionIndex = UnityEngine.Random.Range(0, questions.Length - 1);
         QuestionText.text = questions[questionIndex].Question;
         SummaryQuestionText.text = questions[questionIndex].Question;
         SummaryAnswer.text = questions[questionIndex].Answer.ToString();
@@ -208,20 +208,7 @@ public class Manager : MonoBehaviourPun
     public void OnSubmitAnswerButton()
     {
         WaitingForOtherPlayerImage.SetActive(true);
-
-        
-        //pv.RPC("SendToMasterClient", RpcTarget.All, Answer.text, PhotonNetwork.LocalPlayer.ActorNumber);
-        /*if (PhotonNetwork.IsMasterClient)
-        {
-            Debug.Log("You are the master client. Cannot send to yourself.");
-            //SendToMasterClient(AnswerTF.text, PhotonNetwork.LocalPlayer.ActorNumber, PhotonNetwork.NickName);
-            photonView.RPC("SendToMasterClient", RpcTarget.MasterClient, AnswerTF.text, betAmount, PhotonNetwork.LocalPlayer.ActorNumber, PhotonNetwork.NickName);
-        }
-        else*/
-        {
-            //PhotonView photonView = PhotonView.Get(this);
-            photonView.RPC("SendAnswerToAll", RpcTarget.All, AnswerTF.text, PhotonNetwork.LocalPlayer.ActorNumber, betAmount, PhotonNetwork.NickName);
-        }
+        photonView.RPC("SendAnswerToAll", RpcTarget.All, AnswerTF.text, PhotonNetwork.LocalPlayer.ActorNumber, betAmount, PhotonNetwork.NickName);
     }
     [PunRPC]
     public void SendAnswerToAll(string answer, int actorNumber, int bet, string name)
@@ -270,7 +257,7 @@ public class Manager : MonoBehaviourPun
                 pl.answer = int.Parse(answer);
                 pl.difference = CheckForDifference(pl.answer, questions[questionIndex].Answer);
                 pl.betAmount = bet;
-
+                pl.answered = true;
                 ListOfPlayer.text = ListOfPlayer.text + "\n" + "name: " + pl.name + "Answer" + pl.answer;
                 //photonView.RPC("RecieveFromMasterClient", RpcTarget.All, pl.answer, pl.actorNumber, questions[questionIndex].Answer, pl.difference);
             }
@@ -283,6 +270,7 @@ public class Manager : MonoBehaviourPun
             pl.answer = int.Parse(answer);
             pl.difference = CheckForDifference(pl.answer, questions[questionIndex].Answer);
             pl.betAmount = bet;
+            pl.answered = true;
             players.Add(pl);
 
             //photonView.RPC("RecieveFromMasterClient", RpcTarget.All, pl.answer, pl.actorNumber, questions[questionIndex].Answer, pl.difference);
@@ -294,7 +282,7 @@ public class Manager : MonoBehaviourPun
             bool allAnswered = true;
             foreach (Player p in players)
             {
-                if (p.betAmount == 0)
+                if (!p.answered)
                 {
                     allAnswered = false;
                     Debug.Log("Bet: " + p.betAmount + " Not by: " + p.name);
@@ -342,22 +330,28 @@ public class Manager : MonoBehaviourPun
         WaitingForOtherPlayerImage.SetActive(false);
         CheckForWinnerButton.SetActive(false);
         SummaryScreen.SetActive(true);
-        photonView.RPC("CalculateResults", RpcTarget.MasterClient);
+        if (PhotonNetwork.IsMasterClient)
+        {
+            photonView.RPC("CalculateResults", RpcTarget.MasterClient);
+        }
     }
     [PunRPC]
     public void CalculateResults() //To be called on a button
     {
-        photonView.RPC("ShortListWinner", RpcTarget.AllBuffered, null);
+        photonView.RPC("ShortListWinner", RpcTarget.MasterClient, null);
+        //ShortListWinner();
     }
     [PunRPC]
     public void ShortListWinner()
     {
+        Debug.Log("ShortLIST WINNER CALLED");
+
         int totalBetAmount = 0;
         //if (!PhotonNetwork.IsMasterClient) return;
         //QuestionText.text = "";
         int diff = Int32.MaxValue;
         int actorNumber = 0;
-
+        winner = new List<Player>();
         //ListOfPlayer.text = "We are here";
 
         foreach (Player p in players)
@@ -368,18 +362,21 @@ public class Manager : MonoBehaviourPun
                 diff = p.difference;
                 //winner.Add(p);
             }
-            ListOfPlayer.text = ListOfPlayer + "\n" + "Name: " + p.name + "- Difference: " + p.difference;
+            //ListOfPlayer.text = ListOfPlayer + "\n" + "Name: " + p.name + "- Difference: " + p.difference;
         }
 
         foreach (Player p in players)
         {
+            Debug.Log("PPP: " + p.actorNumber);
             if (p.actorNumber == actorNumber) //To Add the one that was found the smallest in the previous loop
             {
                 winner.Add(p);
+                Debug.Log("WWW: First winner: " + p.actorNumber);
             }
             if (p.difference == diff && p.actorNumber != actorNumber) //To find any other with same differences
             {
                 winner.Add(p);
+                Debug.Log("WWW: Second winner: " + p.actorNumber);
             }
             totalBetAmount += p.betAmount;
         }
@@ -411,35 +408,18 @@ public class Manager : MonoBehaviourPun
     {
         if (actorNumber == PhotonNetwork.LocalPlayer.ActorNumber)
         {
-            //QuestionText.text = "You  Win" + name + " with answer " + answer + "- Correct: " + correctAnswer + "- Difference: " + difference + " WINNER!!!";
-            //QuestionBox.SetActive(false);
-
-            //SummaryScreen.SetActive(true);
-
             WhoWonText.text = "YOU WIN!!!";
             BetAmountWin.text = prize.ToString();
         }
-
-        /*else
-        {
-            QuestionText.text = name + " with answer " + answer + "- Correct: " + correctAnswer + "- Difference: " + difference + "Wins";
-        }*/
     }
     [PunRPC]
     public void AnnounceLoser(int actorNumber, int answer, int correctAnswer, int difference, string name)
     {
         if (actorNumber == PhotonNetwork.LocalPlayer.ActorNumber)
         {
-            //QuestionText.text = "You  Loose" + name + " with answer " + answer + "- Correct: " + correctAnswer + "- Difference: " + difference + " WINNER!!!";
-            //QuestionBox.SetActive(false);
-            //SummaryScreen.SetActive(true);
             WhoWonText.text = "YOU LOST!!!";
             BetAmountWin.text = "0";
         }
-        /*else
-        {
-            QuestionText.text = name + " with answer " + answer + "- Correct: " + correctAnswer + "- Difference: " + difference + "Wins";
-        }*/
     }
     public void ShowResults()
     {
@@ -454,39 +434,37 @@ public class Manager : MonoBehaviourPun
     [PunRPC]
     public void AddToMasterClient(int actorNumber, string name)
     {
-       /* bool exist = false;
-        foreach (Player pl in players)
+        bool exist = false;
+        foreach(Player pl in players)
         {
             if(pl.actorNumber == actorNumber)
             {
                 exist = true;
             }
         }
-        if (!exist)*/
+        if (!exist)
         {
             Player p = new Player();
             p.actorNumber = actorNumber;
             p.name = name;
             players.Add(p);
             ListOfPlayer.text = "";
-
-            if (PhotonNetwork.IsMasterClient)
-            {
-                Name1.text = pv.Owner.NickName;
-            }
-            else
-            {
-                Name2.text = PhotonNetwork.NickName;
-            }
         }
-        
+
+        if (PhotonNetwork.IsMasterClient)
+        {
+            Name1.text = pv.Owner.NickName;
+        }
+        else
+        {
+            Name2.text = PhotonNetwork.NickName;
+        }
         foreach (Player pl in players)
         {
             ListOfPlayer.text = ListOfPlayer.text + "\n" + "Name: " + pl.name + " ActorNumber: " + pl.actorNumber;
             Debug.Log("MMaster: ------------");
             Debug.Log("MMaster: Player Name: " + pl.name);
         }
-        //ListOfPlayer.text = ListOfPlayer.text + "/n" + "Name: " + name + " ActorNumber: " + actorNumber;
     }
     
     public void OnClickSetBet()
@@ -577,20 +555,13 @@ public class Manager : MonoBehaviourPun
         Debug.Log("Here");
 
         SummaryScreen.SetActive(false);
-        //Debug.Log("SummaryScreenDisabled: " + SummaryScreen.activeSelf);
         ResultScreen.SetActive(false);
-        //Debug.Log("ResultScreenDisabled: " + ResultScreen.activeSelf);
         CheckForWinnerButton.SetActive(false);
         WaitingForOtherPlayerImage.SetActive(false);
         Player1Summary.SetActive(false);
         Player2Summary.SetActive(false);
         PvPScreen.SetActive(true);
-        foreach (Player p in players)
-        {
-            betAmount = 0;
-            p.answer = 0;
-            p.difference = 0;
-        }
+        
     }
 
     public void GoToHomePage()
