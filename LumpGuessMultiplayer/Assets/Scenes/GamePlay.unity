@@ -6637,7 +6637,7 @@ MonoBehaviour:
   SummaryQuestionText: {fileID: 1749268770}
   SummaryAnswer: {fileID: 477940981}
   WhoWonText: {fileID: 1521897812}
-  BetAmountWin: {fileID: 113270232}
+  crownTotalPrize: {fileID: 113270232}
   AnswerTF: {fileID: 1016735257}
   SubmitAnswerButton: {fileID: 1219850656}
   CheckForWinnerButton: {fileID: 82991281}
