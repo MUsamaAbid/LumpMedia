@@ -83,6 +83,8 @@ public class Manager : MonoBehaviourPun
 
     [SerializeField] GameObject FightAgainButton;
 
+    [SerializeField] GameObject WaitingForOtherPlayersScreen;
+
     [SerializeField] Text RoundText;
     int round;
 
@@ -590,11 +592,16 @@ public class Manager : MonoBehaviourPun
         {
             Name2.text = PhotonNetwork.NickName;
         }
-        foreach (Player pl in players)
+        if (PhotonNetwork.IsMasterClient)
         {
-            ListOfPlayer.text = ListOfPlayer.text + "\n" + "Name: " + pl.name + " ActorNumber: " + pl.actorNumber;
-            Debug.Log("MMaster: ------------");
-            Debug.Log("MMaster: Player Name: " + pl.name);
+            if (players.Count > 1)
+            {
+                WaitingForOtherPlayersScreen.SetActive(false);
+            }
+            else
+            {
+                WaitingForOtherPlayersScreen.SetActive(true);
+            }
         }
     }
     
