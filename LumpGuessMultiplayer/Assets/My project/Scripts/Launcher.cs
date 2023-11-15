@@ -55,5 +55,7 @@ public class Launcher : MonoBehaviourPunCallbacks
     public override void OnJoinRandomFailed(short returnCode, string message)
     {
         Debug.Log(returnCode + " - Room Not Joined: " + message);
+        string roomName = "Room" + Random.Range(1, 1000);
+        PhotonNetwork.CreateRoom(roomName, new RoomOptions { MaxPlayers = 4 });
     }
 }

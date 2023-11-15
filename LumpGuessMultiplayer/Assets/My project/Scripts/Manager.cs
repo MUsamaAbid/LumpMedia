@@ -86,6 +86,9 @@ public class Manager : MonoBehaviourPun
     [SerializeField] GameObject WaitingForOtherPlayersScreen;
 
     [SerializeField] Text RoundText;
+
+    [SerializeField] Timer timer;
+
     int round;
 
     bool gameEnded;
@@ -160,7 +163,8 @@ public class Manager : MonoBehaviourPun
                 p.answer = 0;
                 p.difference = 0;
             }
-            questionIndex = UnityEngine.Random.Range(0, questions.Length - 1);
+            //questionIndex = UnityEngine.Random.Range(0, questions.Length - 1);
+            questionIndex = round;
             //questionIndex = 6;
             pv.RPC("SetQuestionIndex", RpcTarget.AllBuffered, questionIndex);
             QuestionText.text = questions[questionIndex].Question;
@@ -173,9 +177,8 @@ public class Manager : MonoBehaviourPun
         {
             pv.RPC("AskForQuestionIndex", RpcTarget.MasterClient);
         }
-
-        
     }
+
     [PunRPC]
     void AskForQuestionIndex()
     {
@@ -239,7 +242,6 @@ public class Manager : MonoBehaviourPun
                 Player2BetSummaryScreen.text = bet.ToString();
                 Player2Summary.SetActive(true);
             }
-
         }
         else
         {
@@ -265,6 +267,7 @@ public class Manager : MonoBehaviourPun
             {
                 exist = true;
                 pl.answer = int.Parse(answer);
+                //Here you have to check if the answer isn't empty or not
                 pl.difference = CheckForDifference(pl.answer, questions[questionIndex].Answer);
                 pl.betAmount = bet;
                 pl.answered = true;
@@ -601,10 +604,14 @@ public class Manager : MonoBehaviourPun
             else
             {
                 WaitingForOtherPlayersScreen.SetActive(true);
+                StartGame();
             }
         }
     }
-    
+    void StartGame()
+    {
+        timer.RestartTimer();
+    }
     public void OnClickSetBet()
     {
         photonView.RPC("SetBet", RpcTarget.MasterClient, PhotonNetwork.LocalPlayer.ActorNumber, int.Parse(BetAmount.text));

@@ -6,13 +6,13 @@ public class Timer : MonoBehaviour
 {
     public float timerDuration = 7f; // Timer duration in seconds
     private float timer; // Current timer value
-    private bool isTimerRunning = true;
-
+    private bool isTimerRunning = false;
+    Manager manager;
     void Start()
     {
         // Initialize the timer
-        ResetTimer();
-        StartTimer();
+        //ResetTimer();
+        //StartTimer();
     }
 
     void Update()
@@ -55,7 +55,7 @@ public class Timer : MonoBehaviour
     // Method to reset the timer to its initial value
     public void ResetTimer()
     {
-        timer = timerDuration;
         isTimerRunning = false;
+        timer = timerDuration;
     }
 }
