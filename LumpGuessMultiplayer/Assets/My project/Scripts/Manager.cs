@@ -271,7 +271,6 @@ public class Manager : MonoBehaviourPun
                 ListOfPlayer.text = ListOfPlayer.text + "\n" + "name: " + pl.name + "Answer" + pl.answer;
                 //photonView.RPC("RecieveFromMasterClient", RpcTarget.All, pl.answer, pl.actorNumber, questions[questionIndex].Answer, pl.difference);
                 //FillPlayerStats(answer, actorNumber, bet, name, pl);
-                FillPlayerStats(answer, actorNumber, bet, name, pl);
             }
         }
         if (!exist)
@@ -452,6 +451,9 @@ public class Manager : MonoBehaviourPun
                 if(p.actorNumber == pl.actorNumber)
                 {
                     p.reward += prize; //prize adding
+                    Debug.Log("Reward added: Reward - " + p.reward);
+                    Debug.Log("Reward added: Prize - " + prize);
+                    Debug.Log("Reward added: name - " + p.name);
                     win = true;
                     //photonView.RPC("AnnounceWinner", RpcTarget.All, p.actorNumber, p.answer, questions[questionIndex].Answer, prize, CheckForDifference(p.answer, questions[questionIndex].Answer), p.name);
                     Debug.Log("MMaster: Winner is: " + p.name);
@@ -507,6 +509,9 @@ public class Manager : MonoBehaviourPun
                     photonView.RPC("AnnounceLoser", RpcTarget.All, pl.actorNumber, pl.answer, questions[questionIndex].Answer, CheckForDifference(pl.answer, questions[questionIndex].Answer), pl.name);
                 }
             }
+            Debug.Log("PPPlayer: Name: " + p.name);
+            Debug.Log("PPPlayer: totalBet: " + p.totalBet);
+            Debug.Log("PPPlayer: reward: " + p.reward);
         }
 
     }
