@@ -81,8 +81,6 @@ public class Manager : MonoBehaviourPun
     [SerializeField] Text Player2BetSummaryScreen;
     [SerializeField] Text Player2AnswerSummaryScreen;
 
-    [SerializeField] GameObject FightAgainButton;
-
     [SerializeField] GameObject WaitingForOtherPlayersScreen;
 
     [SerializeField] Text RoundText;
@@ -111,15 +109,6 @@ public class Manager : MonoBehaviourPun
 
         Player1Summary.SetActive(false);
         Player2Summary.SetActive(false);
-
-        if (PhotonNetwork.IsMasterClient)
-        {
-            FightAgainButton.SetActive(true);
-        }
-        else
-        {
-            FightAgainButton.SetActive(false);
-        }
 
         OnClickDisplayQuestion();
     }
