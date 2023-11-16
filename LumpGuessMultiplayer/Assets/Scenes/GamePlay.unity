@@ -7079,6 +7079,8 @@ MonoBehaviour:
     Answer: 19
   - Question: How many bones are there in the adult human body?
     Answer: 206
+  - Question: How many days human body can survive without water?
+    Answer: 3
   BetAmount: {fileID: 708826196}
   Bet10: {fileID: 1546080609}
   Bet25: {fileID: 1138247297}

@@ -134,7 +134,7 @@ public class Manager : MonoBehaviourPun
     public void OnClickDisplayQuestion()
     {
         round ++;
-        if(round >= 3)
+        if(round >= 10)
         {
             gameEnded = true;
         }
