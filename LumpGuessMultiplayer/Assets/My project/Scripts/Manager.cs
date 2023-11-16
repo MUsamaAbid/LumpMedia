@@ -496,12 +496,12 @@ public class Manager : MonoBehaviourPun
                     Debug.Log("MMaster: Winner is: " + p.name);
                     Debug.Log("TTT-P: " + p.reward); //Check this
                     Debug.Log("DDebug:OnSubmitAnswer - PrizeGivenTo(" + p.name + ")" + "PrizeAmount(" + prize + ")TotalPrize(" + p.reward + ")" + "TotalBet(" + p.totalBet +")");
-                    pv.RPC("DisplayOnSummaryScreen", RpcTarget.All, p.actorNumber, p.name, prize, p.betAmount);
+                    pv.RPC("DisplayOnSummaryScreen", RpcTarget.All, p.actorNumber, p.name, prize, p.betAmount, p.reward);
                 }
             }
             if (!win)
             {
-                pv.RPC("DisplayOnSummaryScreen", RpcTarget.All, pl.actorNumber, pl.name, 0, pl.betAmount);
+                pv.RPC("DisplayOnSummaryScreen", RpcTarget.All, pl.actorNumber, pl.name, 0, pl.betAmount, pl.reward);
                 //photonView.RPC("AnnounceLoser", RpcTarget.All, pl.actorNumber, pl.answer, questions[questionIndex].Answer, CheckForDifference(pl.answer, questions[questionIndex].Answer), pl.name);
                 Debug.Log("MMaster: Loose is: " + pl.name);
                 Debug.Log("DDebug:OnSubmitAnswer - Lost(" + pl.name + ")" + "PrizeAmount(" + prize + ")TotalPrize(" + pl.reward + ")" + "TotalBet(" + pl.totalBet + ")");
@@ -510,7 +510,7 @@ public class Manager : MonoBehaviourPun
         
     }
     [PunRPC]
-    void DisplayOnSummaryScreen(int actorNumber, string n, int prize, int bet)
+    void DisplayOnSummaryScreen(int actorNumber, string n, int prize, int bet, int reward)
     {
         if (PhotonNetwork.IsMasterClient)
         {
@@ -519,6 +519,14 @@ public class Manager : MonoBehaviourPun
                 Player1NameSummaryScreen.text = n;
                 Player1RewardSummaryScreen.text = prize.ToString();
                 Player1BetSummaryScreen.text = bet.ToString();
+                MyPlayer[] myPlayers = FindObjectsOfType<MyPlayer>();
+                foreach(MyPlayer pl in myPlayers)
+                {
+                    if (pl.actorNumber == actorNumber)
+                        {
+                            pl.playerScoreText.text = reward.ToString();
+                    }
+                }
                 Player1Summary.SetActive(true);
             }
             else
@@ -526,6 +534,14 @@ public class Manager : MonoBehaviourPun
                 Player2NameSummaryScreen.text = n;
                 Player2RewardSummaryScreen.text = prize.ToString();
                 Player2BetSummaryScreen.text = bet.ToString();
+                MyPlayer[] myPlayers = FindObjectsOfType<MyPlayer>();
+                foreach (MyPlayer pl in myPlayers)
+                {
+                    if (pl.actorNumber == actorNumber)
+                        {
+                            pl.playerScoreText.text = reward.ToString();
+                    }
+                }
                 Player2Summary.SetActive(true);
             }
         }
@@ -536,6 +552,14 @@ public class Manager : MonoBehaviourPun
                 Player2NameSummaryScreen.text = n;
                 Player2RewardSummaryScreen.text = prize.ToString();
                 Player2BetSummaryScreen.text = bet.ToString();
+                MyPlayer[] myPlayers = FindObjectsOfType<MyPlayer>();
+                foreach (MyPlayer pl in myPlayers)
+                {
+                    if (pl.actorNumber == actorNumber)
+                    {
+                        pl.playerScoreText.text = reward.ToString();
+                    }
+                }
                 Player2Summary.SetActive(true);
             }
             else
@@ -543,6 +567,14 @@ public class Manager : MonoBehaviourPun
                 Player1NameSummaryScreen.text = n;
                 Player1RewardSummaryScreen.text = prize.ToString();
                 Player1BetSummaryScreen.text = bet.ToString();
+                MyPlayer[] myPlayers = FindObjectsOfType<MyPlayer>();
+                foreach (MyPlayer pl in myPlayers)
+                {
+                    if (pl.actorNumber == actorNumber)
+                        {
+                            pl.playerScoreText.text = reward.ToString();
+                    }
+                }
                 Player1Summary.SetActive(true);
             }
         }

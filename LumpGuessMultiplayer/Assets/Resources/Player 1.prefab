@@ -156,7 +156,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: 100
+  m_Text: 0
 --- !u!1 &8959109888413921576
 GameObject:
   m_ObjectHideFlags: 0
@@ -353,4 +353,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   PlayerName: {fileID: 8959109888413921582}
   pv: {fileID: 8959109888590351843}
+  playerScoreText: {fileID: 8959109887770738469}
   manager: {fileID: 0}
+  actorNumber: 0

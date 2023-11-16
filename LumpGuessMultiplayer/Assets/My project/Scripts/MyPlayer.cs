@@ -6,20 +6,25 @@ using Photon.Pun;
 
 public class MyPlayer : MonoBehaviourPun
 {
-    [SerializeField] Text PlayerName;
+    [SerializeField] public Text PlayerName;
     [SerializeField] PhotonView pv;
 
+    [SerializeField] public Text playerScoreText;
     [SerializeField] Manager manager;
+
+    public int actorNumber;
     // Start is called before the first frame update
     void Start()
     {
         if (photonView.IsMine)
         {
             PlayerName.text = PhotonNetwork.NickName;
+            actorNumber = PhotonNetwork.LocalPlayer.ActorNumber;
         }
         else
         {
             PlayerName.text = pv.Owner.NickName;
+            actorNumber = photonView.OwnerActorNr;
         }
         AddInTheList();
      }
