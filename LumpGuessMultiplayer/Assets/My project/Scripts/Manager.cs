@@ -74,12 +74,12 @@ public class Manager : MonoBehaviourPun
     [SerializeField] GameObject Player1Summary;
     [SerializeField] Text Player1NameSummaryScreen;
     [SerializeField] Text Player1BetSummaryScreen;
-    [SerializeField] Text Player1AnswerSummaryScreen;
+    [SerializeField] Text Player1RewardSummaryScreen;
 
     [SerializeField] GameObject Player2Summary;
     [SerializeField] Text Player2NameSummaryScreen;
     [SerializeField] Text Player2BetSummaryScreen;
-    [SerializeField] Text Player2AnswerSummaryScreen;
+    [SerializeField] Text Player2RewardSummaryScreen;
 
     [SerializeField] GameObject WaitingForOtherPlayersScreen;
 
@@ -134,7 +134,7 @@ public class Manager : MonoBehaviourPun
     public void OnClickDisplayQuestion()
     {
         round ++;
-        if(round >= 10)
+        if(round >= 3)
         {
             gameEnded = true;
         }
@@ -233,17 +233,17 @@ public class Manager : MonoBehaviourPun
     {
         if (PhotonNetwork.IsMasterClient)
         {
-            if(actorNumber == PhotonNetwork.LocalPlayer.ActorNumber)
+            if (actorNumber == PhotonNetwork.LocalPlayer.ActorNumber)
             {
                 Player1NameSummaryScreen.text = name;
-                Player1AnswerSummaryScreen.text = answer;
+                Player1RewardSummaryScreen.text = answer;
                 Player1BetSummaryScreen.text = bet.ToString();
                 Player1Summary.SetActive(true);
             }
             else
             {
                 Player2NameSummaryScreen.text = name;
-                Player2AnswerSummaryScreen.text = answer;
+                Player2RewardSummaryScreen.text = answer;
                 Player2BetSummaryScreen.text = bet.ToString();
                 Player2Summary.SetActive(true);
             }
@@ -253,14 +253,14 @@ public class Manager : MonoBehaviourPun
             if (actorNumber == PhotonNetwork.LocalPlayer.ActorNumber)
             {
                 Player2NameSummaryScreen.text = name;
-                Player2AnswerSummaryScreen.text = answer;
+                Player2RewardSummaryScreen.text = answer;
                 Player2BetSummaryScreen.text = bet.ToString();
                 Player2Summary.SetActive(true);
             }
             else
             {
                 Player1NameSummaryScreen.text = name;
-                Player1AnswerSummaryScreen.text = answer;
+                Player1RewardSummaryScreen.text = answer;
                 Player1BetSummaryScreen.text = bet.ToString();
                 Player1Summary.SetActive(true);
             }
@@ -300,7 +300,7 @@ public class Manager : MonoBehaviourPun
 
             //photonView.RPC("RecieveFromMasterClient", RpcTarget.All, pl.answer, pl.actorNumber, questions[questionIndex].Answer, pl.difference);
         }
-
+        
         #region Check if everybody Answered
         if (PhotonNetwork.IsMasterClient)
         {
@@ -323,10 +323,13 @@ public class Manager : MonoBehaviourPun
                     WaitingForOtherPlayerImage.SetActive(false);
                     //CheckForWinnerButton.SetActive(true);
                     CheckForTheWinner();
+                    pv.RPC("ShowResults", RpcTarget.All);
                 }
                 else
                 {
-                    StartNextRound();
+                    CheckForTheWinner();
+                    //StartNextRound();
+                    StartCoroutine(N());
                     timerEnded = false;
                 }
             }
@@ -338,22 +341,26 @@ public class Manager : MonoBehaviourPun
         }
         #endregion
     }
-
-    private void FillPlayerStats(string answer, int actorNumber, int bet, string name, Player pl)
+    IEnumerator N()
+    {
+        yield return new WaitForSeconds(5);
+        StartNextRound();
+    }
+    /*private void FillPlayerStats(string answer, int actorNumber, int bet, string name, Player pl)
     {
         if (PhotonNetwork.IsMasterClient)
         {
             if (actorNumber == PhotonNetwork.LocalPlayer.ActorNumber)
             {
                 Player1NameSummaryScreen.text = pl.name;
-                Player1AnswerSummaryScreen.text = pl.answer.ToString();
+                Player1RewardSummaryScreen.text = pl.answer.ToString();
                 Player1BetSummaryScreen.text = pl.totalBet.ToString();
                 Player1Summary.SetActive(true);
             }
             else
             {
                 Player2NameSummaryScreen.text = pl.name;
-                Player2AnswerSummaryScreen.text = pl.answer.ToString();
+                Player2RewardSummaryScreen.text = pl.answer.ToString();
                 Player2BetSummaryScreen.text = pl.totalBet.ToString();
                 Player2Summary.SetActive(true);
             }
@@ -364,19 +371,19 @@ public class Manager : MonoBehaviourPun
             if (actorNumber == PhotonNetwork.LocalPlayer.ActorNumber)
             {
                 Player2NameSummaryScreen.text = name;
-                Player2AnswerSummaryScreen.text = answer;
+                Player2RewardSummaryScreen.text = answer;
                 Player2BetSummaryScreen.text = bet.ToString();
                 Player2Summary.SetActive(true);
             }
             else
             {
                 Player1NameSummaryScreen.text = name;
-                Player1AnswerSummaryScreen.text = answer;
+                Player1RewardSummaryScreen.text = answer;
                 Player1BetSummaryScreen.text = bet.ToString();
                 Player1Summary.SetActive(true);
             }
         }
-    }
+    }*/
 
     /*[PunRPC]
     public void RecieveFromMasterClient(int answer, int actorNumber, int correctAnswer, int difference)
@@ -401,7 +408,7 @@ public class Manager : MonoBehaviourPun
         QuestionBox.SetActive(false);
         WaitingForOtherPlayerImage.SetActive(false);
         CheckForWinnerButton.SetActive(false);
-        //SummaryScreen.SetActive(true);
+        SummaryScreen.SetActive(true);
         if (PhotonNetwork.IsMasterClient)
         {
             photonView.RPC("CalculateResults", RpcTarget.MasterClient);
@@ -475,6 +482,7 @@ public class Manager : MonoBehaviourPun
                     Debug.Log("MMaster: Winner is: " + p.name);
                     Debug.Log("TTT-P: " + p.reward); //Check this
                     Debug.Log("DDebug:OnSubmitAnswer - PrizeGivenTo(" + p.name + ")" + "PrizeAmount(" + prize + ")TotalPrize(" + p.reward + ")" + "TotalBet(" + p.totalBet +")");
+                    pv.RPC("DisplayOnSummaryScreen", RpcTarget.All, p.actorNumber, p.betAmount, prize, p.name);
                 }
             }
             if (!win)
@@ -482,9 +490,47 @@ public class Manager : MonoBehaviourPun
                 //photonView.RPC("AnnounceLoser", RpcTarget.All, pl.actorNumber, pl.answer, questions[questionIndex].Answer, CheckForDifference(pl.answer, questions[questionIndex].Answer), pl.name);
                 Debug.Log("MMaster: Loose is: " + pl.name);
                 Debug.Log("DDebug:OnSubmitAnswer - Lost(" + pl.name + ")" + "PrizeAmount(" + prize + ")TotalPrize(" + pl.reward + ")" + "TotalBet(" + pl.totalBet + ")");
+                pv.RPC("DisplayOnSummaryScreen", RpcTarget.All, pl.actorNumber, pl.betAmount, 0, pl.name);
             }
         }
-        
+    }
+    [PunRPC]
+    void DisplayOnSummaryScreen(int actorNumber,int bet, int prize, string n)
+    {
+        if (PhotonNetwork.IsMasterClient)
+        {
+            if (actorNumber == PhotonNetwork.LocalPlayer.ActorNumber)
+            {
+                Player1NameSummaryScreen.text = n;
+                Player1RewardSummaryScreen.text = prize.ToString();
+                Player1BetSummaryScreen.text = bet.ToString();
+                Player1Summary.SetActive(true);
+            }
+            else
+            {
+                Player2NameSummaryScreen.text = n;
+                Player2RewardSummaryScreen.text = prize.ToString();
+                Player2BetSummaryScreen.text = bet.ToString();
+                Player2Summary.SetActive(true);
+            }
+        }
+        else
+        {
+            if (actorNumber == PhotonNetwork.LocalPlayer.ActorNumber)
+            {
+                Player2NameSummaryScreen.text = n;
+                Player2RewardSummaryScreen.text = prize.ToString();
+                Player2BetSummaryScreen.text = bet.ToString();
+                Player2Summary.SetActive(true);
+            }
+            else
+            {
+                Player1NameSummaryScreen.text = n;
+                Player1RewardSummaryScreen.text = prize.ToString();
+                Player1BetSummaryScreen.text = bet.ToString();
+                Player1Summary.SetActive(true);
+            }
+        }
     }
     void ResultsBaseOnPrize()
     {
@@ -537,7 +583,7 @@ public class Manager : MonoBehaviourPun
             Debug.Log("PPPlayer: totalBet: " + p.totalBet);
             Debug.Log("PPPlayer: reward: " + p.reward);
         }
-        pv.RPC("ShowResults", RpcTarget.All);
+        //pv.RPC("ShowResults", RpcTarget.All);
     }
     [PunRPC]
     public void AnnounceWinner(int actorNumber, int answer, int correctAnswer, int reward, int difference, string name) 
