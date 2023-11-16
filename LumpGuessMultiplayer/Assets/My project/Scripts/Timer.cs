@@ -9,15 +9,18 @@ public class Timer : MonoBehaviour
     private float timer; // Current timer value
     private bool isTimerRunning = false;
     [SerializeField] Manager manager;
+    [SerializeField] Image fillbar;
 
     [SerializeField] Text timerUI;
     int t;
+    float portion;
     void Start()
     {
         isTimerRunning = false;
         // Initialize the timer
         //ResetTimer();
         //StartTimer();
+        portion = 1 / timerDuration;
     }
 
     void Update()
@@ -29,7 +32,10 @@ public class Timer : MonoBehaviour
             timer -= Time.deltaTime;
             int t = (int)timer;
             timerUI.text = t.ToString();
-            Debug.Log("Time: " + timer);
+            //fillbar.fillAmount = 1 - ((portion * timer) / 100);
+            fillbar.fillAmount = Mathf.Clamp01(timer / timerDuration);
+
+            //Debug.Log("Time: " + timer);
             // Check if the timer has reached zero
             if (timer <= 0f)
             {
