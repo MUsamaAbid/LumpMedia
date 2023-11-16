@@ -530,7 +530,14 @@ public class Manager : MonoBehaviourPun
                 if(pl.actorNumber == p.actorNumber)
                 {
                     win = true;
-                    photonView.RPC("AnnounceWinner", RpcTarget.All, p.actorNumber, p.answer, questions[questionIndex].Answer, p.reward, CheckForDifference(p.answer, questions[questionIndex].Answer), p.name);
+                    if(p.reward == 0)
+                    {
+                        photonView.RPC("AnnounceLoser", RpcTarget.All, p.actorNumber, p.answer, questions[questionIndex].Answer, p.reward, CheckForDifference(p.answer, questions[questionIndex].Answer), p.name);
+                    }
+                    else
+                    {
+                        photonView.RPC("AnnounceWinner", RpcTarget.All, p.actorNumber, p.answer, questions[questionIndex].Answer, p.reward, CheckForDifference(p.answer, questions[questionIndex].Answer), p.name);
+                    }
                 }
             }
             if (!win)
