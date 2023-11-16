@@ -7230,7 +7230,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8f60d70c0886a42a2bca904037a726f9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  timerDuration: 12
+  timerDuration: 15
   manager: {fileID: 2040910565}
   fillbar: {fileID: 1569712273}
   timerUI: {fileID: 1069214562}

@@ -134,7 +134,7 @@ public class Manager : MonoBehaviourPun
     public void OnClickDisplayQuestion()
     {
         round ++;
-        if(round >= 10)
+        if(round >= 3)
         {
             gameEnded = true;
         }
@@ -162,6 +162,7 @@ public class Manager : MonoBehaviourPun
             QuestionText.text = questions[questionIndex].Question;
             SummaryQuestionText.text = questions[questionIndex].Question;
             SummaryAnswer.text = questions[questionIndex].Answer.ToString();
+            Debug.Log("ZZZ: Answer: " + questions[questionIndex].Answer);
 
             QuestionBox.SetActive(true);
         }
@@ -219,13 +220,14 @@ public class Manager : MonoBehaviourPun
         WaitingForOtherPlayerImage.SetActive(true);
         if (AnswerTF.text == null || AnswerTF.text == "")
         {
-            //Soemtihng else
+            //Sometihng else
             string str = int.MaxValue.ToString();
             photonView.RPC("SendAnswerToAll", RpcTarget.All, str, PhotonNetwork.LocalPlayer.ActorNumber, betAmount, PhotonNetwork.NickName);
         }
         else
         {
             photonView.RPC("SendAnswerToAll", RpcTarget.All, AnswerTF.text, PhotonNetwork.LocalPlayer.ActorNumber, betAmount, PhotonNetwork.NickName);
+            Debug.Log("ZZZ: Answer entered");
         }
     }
     [PunRPC]
@@ -314,19 +316,31 @@ public class Manager : MonoBehaviourPun
             }
             if (allAnswered || timerEnded)
             {
+                Debug.Log("ZZZ: SW : All answered: " + allAnswered + "-timer:" + timer.isTimerRunning);
+                allAnswered = false;
+                timer.PauseTimer();
+                //timer.ResetTimer();
                 if (PhotonNetwork.IsMasterClient)
                 {
+                    Debug.Log("ZZZ: Shortlist winner called after both questions answered");
                     ShortListWinner(); //Now test Also recheck the result screen
+                    foreach (Player p in players)
+                    {
+                        p.answered = false;
+                    }
                 }
                 if (gameEnded)
                 {
                     WaitingForOtherPlayerImage.SetActive(false);
                     //CheckForWinnerButton.SetActive(true);
                     CheckForTheWinner();
+                    pv.RPC("ShowResults", RpcTarget.All);
                 }
                 else
                 {
-                    StartNextRound();
+                    CheckForTheWinner();
+                    //StartNextRound();
+                    StartCoroutine(N());
                     timerEnded = false;
                 }
             }
@@ -338,7 +352,11 @@ public class Manager : MonoBehaviourPun
         }
         #endregion
     }
-
+    IEnumerator N()
+    {
+        yield return new WaitForSeconds(5f);
+        StartNextRound();
+    }
     private void FillPlayerStats(string answer, int actorNumber, int bet, string name, Player pl)
     {
         if (PhotonNetwork.IsMasterClient)
@@ -401,7 +419,7 @@ public class Manager : MonoBehaviourPun
         QuestionBox.SetActive(false);
         WaitingForOtherPlayerImage.SetActive(false);
         CheckForWinnerButton.SetActive(false);
-        //SummaryScreen.SetActive(true);
+        SummaryScreen.SetActive(true);
         if (PhotonNetwork.IsMasterClient)
         {
             photonView.RPC("CalculateResults", RpcTarget.MasterClient);
@@ -419,7 +437,7 @@ public class Manager : MonoBehaviourPun
     public void ShortListWinner()
     {
         //No need to add bet amount here
-        Debug.Log("ShortLIST WINNER CALLED");
+        Debug.Log("ZZZ: ShortLIST WINNER CALLED");
 
         int totalBetAmount = 0;
         int diff = Int32.MaxValue;
@@ -443,7 +461,7 @@ public class Manager : MonoBehaviourPun
             if (p.actorNumber == actorNumber) //To Add the one that was found the smallest in the previous loop
             {
                 winner.Add(p);
-                Debug.Log("WWW: First winner: " + p.actorNumber);
+                
             }
             if (p.difference == diff && p.actorNumber != actorNumber) //To find any other with same differences
             {
@@ -465,6 +483,9 @@ public class Manager : MonoBehaviourPun
             {
                 if(p.actorNumber == pl.actorNumber)
                 {
+                    Debug.Log("ZZZ: + Winner: " + p.name);
+                    Debug.Log("ZZZ: Prize: " + prize);
+                    Debug.Log("ZZZ: + Reward: " + p.reward);
                     p.reward += prize; //prize adding
                     Debug.Log("Reward added: Bet - " + p.totalBet);
                     Debug.Log("Reward added: Reward - " + p.reward);
@@ -537,7 +558,7 @@ public class Manager : MonoBehaviourPun
             Debug.Log("PPPlayer: totalBet: " + p.totalBet);
             Debug.Log("PPPlayer: reward: " + p.reward);
         }
-        pv.RPC("ShowResults", RpcTarget.All);
+        //pv.RPC("ShowResults", RpcTarget.All);
     }
     [PunRPC]
     public void AnnounceWinner(int actorNumber, int answer, int correctAnswer, int reward, int difference, string name) 

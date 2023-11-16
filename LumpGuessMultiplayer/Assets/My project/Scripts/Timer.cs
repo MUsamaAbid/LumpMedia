@@ -7,7 +7,7 @@ public class Timer : MonoBehaviour
 {
     public float timerDuration = 7f; // Timer duration in seconds
     private float timer; // Current timer value
-    private bool isTimerRunning = false;
+    public bool isTimerRunning = false;
     [SerializeField] Manager manager;
     [SerializeField] Image fillbar;
 
