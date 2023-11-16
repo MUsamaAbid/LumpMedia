@@ -634,6 +634,11 @@ public class Manager : MonoBehaviourPun
         photonView.RPC("SetBet", RpcTarget.MasterClient, PhotonNetwork.LocalPlayer.ActorNumber, int.Parse(BetAmount.text));
     }
     [PunRPC]
+    public void EndGame()
+    {
+        gameEnded = true;
+    }
+    [PunRPC]
     public void SetBet(int actorNumber, int betAmount)
     {
         foreach(Player p in players)
