@@ -1,15 +1,20 @@
 //using System.Diagnostics;
 using UnityEngine;
 using System;
+using UnityEngine.UI;
 
 public class Timer : MonoBehaviour
 {
     public float timerDuration = 7f; // Timer duration in seconds
     private float timer; // Current timer value
     private bool isTimerRunning = false;
-    Manager manager;
+    [SerializeField] Manager manager;
+
+    [SerializeField] Text timerUI;
+    int t;
     void Start()
     {
+        isTimerRunning = false;
         // Initialize the timer
         //ResetTimer();
         //StartTimer();
@@ -22,6 +27,8 @@ public class Timer : MonoBehaviour
         {
             // Update the timer value
             timer -= Time.deltaTime;
+            int t = (int)timer;
+            timerUI.text = t.ToString();
             Debug.Log("Time: " + timer);
             // Check if the timer has reached zero
             if (timer <= 0f)
@@ -31,6 +38,7 @@ public class Timer : MonoBehaviour
                 isTimerRunning = false;
                 // Reset the timer
                 //ResetTimer();
+                manager.TimerEnded();
             }
         }
     }

@@ -93,9 +93,12 @@ public class Manager : MonoBehaviourPun
 
     bool gameEnded;
 
+    bool timerEnded;
+
     private void Start()
     {
         gameEnded = false;
+        timerEnded = false;
         round = 0;
         RoundText.text = "ROUND " + round.ToString();
         //questionIndex = 2;
@@ -217,11 +220,24 @@ public class Manager : MonoBehaviourPun
         QuestionBox.SetActive(true);
         Debug.Log("Question Box activated");
     }
-
+    public void TimerEnded()
+    {
+        timerEnded = true;
+        OnSubmitAnswerButton();
+    }
     public void OnSubmitAnswerButton()
     {
         WaitingForOtherPlayerImage.SetActive(true);
-        photonView.RPC("SendAnswerToAll", RpcTarget.All, AnswerTF.text, PhotonNetwork.LocalPlayer.ActorNumber, betAmount, PhotonNetwork.NickName);
+        if (AnswerTF.text == null || AnswerTF.text == "")
+        {
+            //Soemtihng else
+            string str = int.MaxValue.ToString();
+            photonView.RPC("SendAnswerToAll", RpcTarget.All, str, PhotonNetwork.LocalPlayer.ActorNumber, betAmount, PhotonNetwork.NickName);
+        }
+        else
+        {
+            photonView.RPC("SendAnswerToAll", RpcTarget.All, AnswerTF.text, PhotonNetwork.LocalPlayer.ActorNumber, betAmount, PhotonNetwork.NickName);
+        }
     }
     [PunRPC]
     public void SendAnswerToAll(string answer, int actorNumber, int bet, string name)
@@ -307,7 +323,7 @@ public class Manager : MonoBehaviourPun
                     allAnswered = false;
                 }
             }
-            if (allAnswered)
+            if (allAnswered || timerEnded)
             {
                 if (PhotonNetwork.IsMasterClient)
                 {
@@ -316,11 +332,13 @@ public class Manager : MonoBehaviourPun
                 if (gameEnded)
                 {
                     WaitingForOtherPlayerImage.SetActive(false);
-                    CheckForWinnerButton.SetActive(true);
+                    //CheckForWinnerButton.SetActive(true);
+                    CheckForTheWinner();
                 }
                 else
                 {
                     StartNextRound();
+                    timerEnded = false;
                 }
             }
             else
@@ -394,7 +412,7 @@ public class Manager : MonoBehaviourPun
         QuestionBox.SetActive(false);
         WaitingForOtherPlayerImage.SetActive(false);
         CheckForWinnerButton.SetActive(false);
-        SummaryScreen.SetActive(true);
+        //SummaryScreen.SetActive(true);
         if (PhotonNetwork.IsMasterClient)
         {
             photonView.RPC("CalculateResults", RpcTarget.MasterClient);
@@ -523,7 +541,7 @@ public class Manager : MonoBehaviourPun
             Debug.Log("PPPlayer: totalBet: " + p.totalBet);
             Debug.Log("PPPlayer: reward: " + p.reward);
         }
-
+        pv.RPC("ShowResults", RpcTarget.All);
     }
     [PunRPC]
     public void AnnounceWinner(int actorNumber, int answer, int correctAnswer, int reward, int difference, string name) 
@@ -557,6 +575,7 @@ public class Manager : MonoBehaviourPun
             }
         }
     }
+    [PunRPC]
     public void ShowResults()
     {
         PvPScreen.SetActive(false);
@@ -600,14 +619,16 @@ public class Manager : MonoBehaviourPun
             if (players.Count > 1)
             {
                 WaitingForOtherPlayersScreen.SetActive(false);
+                pv.RPC("StartGame", RpcTarget.All);
+                //StartGame();
             }
             else
             {
                 WaitingForOtherPlayersScreen.SetActive(true);
-                StartGame();
             }
         }
     }
+    [PunRPC]
     void StartGame()
     {
         timer.RestartTimer();
@@ -665,7 +686,7 @@ public class Manager : MonoBehaviourPun
     public void StartNextRound()
     {
         NextRound();
-
+        
         pv.RPC("NextRound", RpcTarget.Others);
     }
     [PunRPC]
@@ -674,6 +695,7 @@ public class Manager : MonoBehaviourPun
         Next();
 
         OnClickDisplayQuestion();
+        timer.RestartTimer();
     }
     void Next()
     {

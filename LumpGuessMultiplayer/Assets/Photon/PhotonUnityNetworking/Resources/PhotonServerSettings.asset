@@ -58,6 +58,9 @@ MonoBehaviour:
   - SetQuestionIndex
   - AskForQuestionIndex
   - NextRound
+  - StartTimer
+  - StartGame
+  - ShowResults
   DisableAutoOpenWizard: 1
   ShowSettings: 1
   DevRegionSetOnce: 1
