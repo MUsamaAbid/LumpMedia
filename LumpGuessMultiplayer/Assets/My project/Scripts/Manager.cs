@@ -51,6 +51,7 @@ public class Manager : MonoBehaviourPun
     [SerializeField] GameObject CheckForWinnerButton;
 
     [SerializeField] GameObject WaitingForOtherPlayerImage;
+    [SerializeField] GameObject ConfirmedButton;
 
     [SerializeField] Questions[] questions;
 
@@ -220,6 +221,7 @@ public class Manager : MonoBehaviourPun
     public void OnSubmitAnswerButton()
     {
         WaitingForOtherPlayerImage.SetActive(true);
+        ConfirmedButton.SetActive(true);
         if (AnswerTF.text == null || AnswerTF.text == "")
         {
             //Sometihng else
@@ -334,6 +336,7 @@ public class Manager : MonoBehaviourPun
                 if (gameEnded)
                 {
                     WaitingForOtherPlayerImage.SetActive(false);
+                    ConfirmedButton.SetActive(false);
                     //CheckForWinnerButton.SetActive(true);
                     CheckForTheWinner();
                     pv.RPC("ShowResults", RpcTarget.All);
@@ -420,6 +423,7 @@ public class Manager : MonoBehaviourPun
     {
         QuestionBox.SetActive(false);
         WaitingForOtherPlayerImage.SetActive(false);
+        ConfirmedButton.SetActive(false);
         CheckForWinnerButton.SetActive(false);
         SummaryScreen.SetActive(true);
         if (PhotonNetwork.IsMasterClient)
@@ -854,6 +858,7 @@ public class Manager : MonoBehaviourPun
         ResultScreen.SetActive(false);
         CheckForWinnerButton.SetActive(false);
         WaitingForOtherPlayerImage.SetActive(false);
+        ConfirmedButton.SetActive(false);
         Player1Summary.SetActive(false);
         Player2Summary.SetActive(false);
         PvPScreen.SetActive(true);
