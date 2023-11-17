@@ -365,14 +365,14 @@ public class Manager : MonoBehaviourPun
             {
                 Player1NameSummaryScreen.text = pl.name;
                 Player1RewardSummaryScreen.text = pl.answer.ToString();
-                Player1BetSummaryScreen.text = pl.totalBet.ToString();
+                Player1BetSummaryScreen.text = "Bet" + pl.totalBet.ToString();
                 Player1Summary.SetActive(true);
             }
             else
             {
                 Player2NameSummaryScreen.text = pl.name;
                 Player2RewardSummaryScreen.text = pl.answer.ToString();
-                Player2BetSummaryScreen.text = pl.totalBet.ToString();
+                Player2BetSummaryScreen.text = "Bet" + pl.totalBet.ToString();
                 Player2Summary.SetActive(true);
             }
 
@@ -383,14 +383,14 @@ public class Manager : MonoBehaviourPun
             {
                 Player2NameSummaryScreen.text = name;
                 Player2RewardSummaryScreen.text = answer;
-                Player2BetSummaryScreen.text = bet.ToString();
+                Player2BetSummaryScreen.text = "Bet" + bet.ToString();
                 Player2Summary.SetActive(true);
             }
             else
             {
                 Player1NameSummaryScreen.text = name;
                 Player1RewardSummaryScreen.text = answer;
-                Player1BetSummaryScreen.text = bet.ToString();
+                Player1BetSummaryScreen.text = "Bet" + bet.ToString();
                 Player1Summary.SetActive(true);
             }
         }
@@ -708,7 +708,7 @@ public class Manager : MonoBehaviourPun
             if (players.Count > 1)
             {
                 WaitingForOtherPlayersScreen.SetActive(false);
-                //PhotonNetwork.CurrentRoom.IsOpen = false;
+                PhotonNetwork.CurrentRoom.IsOpen = false;
                 pv.RPC("StartGame", RpcTarget.All);
                 //StartGame();
             }
