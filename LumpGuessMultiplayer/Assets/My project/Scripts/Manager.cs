@@ -708,6 +708,7 @@ public class Manager : MonoBehaviourPun
             if (players.Count > 1)
             {
                 WaitingForOtherPlayersScreen.SetActive(false);
+                //PhotonNetwork.CurrentRoom.IsOpen = false;
                 pv.RPC("StartGame", RpcTarget.All);
                 //StartGame();
             }
