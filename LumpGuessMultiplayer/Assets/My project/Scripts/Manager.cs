@@ -89,6 +89,9 @@ public class Manager : MonoBehaviourPun
     [SerializeField] Text Player2AnswerSummaryScreen;
 
     [SerializeField] GameObject WaitingForOtherPlayersScreen;
+    [SerializeField] GameObject BanACategoryScreen;
+    bool categorySelected;
+    bool playersJoined;
 
     [SerializeField] Text RoundText;
 
@@ -104,6 +107,8 @@ public class Manager : MonoBehaviourPun
     {
         gameEnded = false;
         timerEnded = false;
+        categorySelected = false;
+        playersJoined = false;
         round = 0;
         RoundText.text = "ROUND " + round.ToString();
         //questionIndex = 2;
@@ -772,21 +777,37 @@ public class Manager : MonoBehaviourPun
             if (players.Count > 1)
             {
                 WaitingForOtherPlayersScreen.SetActive(false);
+                playersJoined = true;
                 PhotonNetwork.CurrentRoom.IsOpen = false;
                 if (PhotonNetwork.IsMasterClient)
                 {
                     pv.RPC("SetVsScreen", RpcTarget.AllBuffered, players[0].name, players[1].name);
                 }
-                StartCoroutine(StartGameCoroutine());
+                if (categorySelected)
+                {
+                    StartCoroutine(StartGameCoroutine());
+                }
+                //StartCoroutine(StartGameCoroutine());
                 //pv.RPC("StartGame", RpcTarget.All);
                 //StartGame();
             }
             else
             {
                 WaitingForOtherPlayersScreen.SetActive(true);
+                BanACategoryScreen.SetActive(true);
             }
         }
         
+    }
+    public void SelectCategory()
+    {
+        categorySelected = true;
+        BanACategoryScreen.SetActive(false);
+        if (playersJoined)
+        {
+            WaitingForOtherPlayersScreen.SetActive(false);
+            StartCoroutine(StartGameCoroutine());
+        }
     }
     [PunRPC]
     void SetVsScreen(string name1, string name2)

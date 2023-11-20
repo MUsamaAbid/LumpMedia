@@ -13,6 +13,8 @@ public class Launcher : MonoBehaviourPunCallbacks
     [SerializeField] GameObject BgNameScreen;
     [SerializeField] GameObject BgRoomSelectionScreen;
 
+    [SerializeField] GameObject BanACategoryScreen;
+
     [SerializeField] Text playerNameText;
 
     private void Start()
