@@ -706,7 +706,14 @@ public class Manager : MonoBehaviourPun
     {
         if (actorNumber == PhotonNetwork.LocalPlayer.ActorNumber)
         {
-            WhoWonText.text = "YOU WIN!!!";
+            if (reward == 0)
+            {
+                WhoWonText.text = "YOU LOST!!!";
+            }
+            else
+            {
+                WhoWonText.text = "YOU WIN!!!";
+            }
             crownTotalPrize.text = reward.ToString();
             foreach(Player p in players)
             {

@@ -17,6 +17,8 @@ public class Launcher : MonoBehaviourPunCallbacks
 
     [SerializeField] Text playerNameText;
 
+    public ServerSettings server;
+
     private void Start()
     {
         Application.targetFrameRate = 20;
@@ -33,6 +35,7 @@ public class Launcher : MonoBehaviourPunCallbacks
     }
     public void OnClickConnectButton()
     {
+        server.AppSettings.FixedRegion = "eu";
         PhotonNetwork.ConnectUsingSettings();
     }
     public override void OnConnectedToMaster()

@@ -2647,6 +2647,7 @@ MonoBehaviour:
   BgRoomSelectionScreen: {fileID: 1524278480}
   BanACategoryScreen: {fileID: 0}
   playerNameText: {fileID: 527506189}
+  server: {fileID: 11400000, guid: 9246efd2426f94b29b6bcbdc23a721c2, type: 2}
 --- !u!114 &599488759
 MonoBehaviour:
   m_ObjectHideFlags: 0
